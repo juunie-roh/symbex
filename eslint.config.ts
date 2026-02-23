@@ -59,7 +59,12 @@ const others: Config["rules"] = {
 };
 
 export default defineConfig([
-  globalIgnores(["node_modules/**", "dist/**", "build/**", "coverage/**"]),
+  globalIgnores([
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+  ]),
   {
     files: ["**/*.{js,ts}"],
     ...eslint.configs.recommended,

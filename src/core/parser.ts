@@ -24,6 +24,7 @@ class Parser {
     if (!this._instance) {
       if (!config)
         throw new CoreError(
+          "CORE_NO_CONFIG",
           "Configuration must be specified for initialization",
         );
 
@@ -44,9 +45,20 @@ class Parser {
   ) {
     const ext = path.extname(file);
     if (!this._plugins.has(ext))
-      throw new CoreError("Unsupported language: no available plugin found");
+      throw new CoreError(
+        "CORE_UNSUPPORTED_LANGUAGE",
+        "Unsupported language: no available plugin found",
+      );
 
-    return this._plugins.get(ext)!.parse(file, oldTree, options);
+    try {
+      return this._plugins.get(ext)!.parse(file, oldTree, options);
+    } catch (e) {
+      throw new CoreError(
+        "CORE_PLUGIN_PARSE_FAILED",
+        `Failed to parse ${file}`,
+        { cause: e },
+      );
+    }
   }
 }
 

@@ -1,5 +1,11 @@
-import { SpineError } from "@/shared/error";
+import { SpineError, SpineErrorCode } from "@/shared/error";
 
-class CoreError extends SpineError {}
+type CoreErrorCode = Extract<SpineErrorCode, `CORE_${string}`>;
+
+class CoreError extends SpineError {
+  constructor(code: CoreErrorCode, message: string, options?: ErrorOptions) {
+    super(code, message, options);
+  }
+}
 
 export { CoreError };

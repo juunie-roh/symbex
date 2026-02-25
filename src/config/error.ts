@@ -1,5 +1,11 @@
-import { SpineError } from "@/shared/error";
+import { SpineError, SpineErrorCode } from "@/shared/error";
 
-class ConfigError extends SpineError {}
+type ConfigErrorCode = Extract<SpineErrorCode, `CONFIG_${string}`>;
+
+class ConfigError extends SpineError {
+  constructor(code: ConfigErrorCode, message: string, options?: ErrorOptions) {
+    super(code, message, options);
+  }
+}
 
 export { ConfigError };

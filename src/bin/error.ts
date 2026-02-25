@@ -1,5 +1,11 @@
-import { SpineError } from "@/shared/error";
+import { SpineError, SpineErrorCode } from "@/shared/error";
 
-class BinaryError extends SpineError {}
+type BinaryErrorCode = Extract<SpineErrorCode, `BIN_${string}`>;
+
+class BinaryError extends SpineError {
+  constructor(code: BinaryErrorCode, message: string, options?: ErrorOptions) {
+    super(code, message, options);
+  }
+}
 
 export { BinaryError };

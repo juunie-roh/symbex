@@ -12,27 +12,23 @@ program
   .description(pkg.description)
   .argument("<file>", "a target file name to parse")
   .argument("[others...]", "additional files")
-  .option("-l, --list", "print a list of nodes", true)
+  .option("-l, --list", "print a list of nodes on console", true)
   .option(
     "-p, --path <config-path>",
     "specify path of configuration",
     "spine.config.json",
   )
-  .action(async (file, others, options, command) => {
-    // others?.forEach((file: string) => console.log(file));
-    // TODO: Discriminate file extensions
-    // TODO: Check if current module supports - Error specification
-    // TODO: Plugin interface definition
-    // TODO: Plugin availability check - Error specification
-    // const { parse, convert } = await import("@juun-roh/spine-typescript");
-    // const tree = convert(await parse(file));
-    // if (options.list) {
-    //   console.log(tree);
-    // }
+  .action(async (file: string, options, command, others?: string[]) => {
     const config = loadConfig(options.path);
     const parser = Parser.get(config);
     const tree = parser.parse(file);
     console.log(tree);
+
+    if (others) {
+      others.forEach((f: string) => {
+        console.log(parser.parse(f));
+      });
+    }
   });
 
 program.parse(process.argv);

@@ -22,7 +22,7 @@
     "dev": "tsup --watch",
     "lint": "eslint .",
     "prepare": "husky",
-    "run:dev": "node dist/bin",
+    "run:dev": "node dist/bin/spine.js -p src/__mocks__/spine.config.json",
     "test": "echo \"Error: no test specified\" && exit 1",
     "ts": "pnpm --filter @juun-roh/spine-typescript",
     "tsx": "pnpm --filter @juun-roh/spine-tsx"

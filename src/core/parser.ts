@@ -8,9 +8,8 @@ import { CoreError } from "./error";
 import { Plugin } from "./plugin";
 
 class Parser {
-  /** A singleton parser instance */
   private static _instance: Parser | undefined;
-  /** A tree-sitter parser instances */
+
   private _plugins: Map<string, Plugin>;
 
   private constructor(config: Config) {
@@ -20,6 +19,11 @@ class Parser {
     });
   }
 
+  /**
+   * Returns the singleton instance, creating it on first call.
+   * @param config Required on first call to initialize the parser; ignored thereafter
+   * @throws If called for the first time without a config
+   */
   public static get(config?: Config): Parser {
     if (!this._instance) {
       if (!config)
@@ -33,11 +37,19 @@ class Parser {
 
     return this._instance;
   }
-
-  public get plugin() {
+  /** {@link Plugin `Plugin`} instances keyed by file extension. */
+  public get plugins() {
     return this._plugins;
   }
 
+  /**
+   * Parses a source file using the plugin registered for its file extension.
+   * @param file Path to the source file to parse
+   * @param oldTree Previous tree for incremental parsing
+   * @param options Parsing options passed to tree-sitter
+   * @throws If no plugin is registered for the file's extension
+   * @throws If the plugin fails to parse the file
+   */
   public parse(
     file: string,
     oldTree?: TSParser.Tree | null,
@@ -47,7 +59,7 @@ class Parser {
     if (!this._plugins.has(ext))
       throw new CoreError(
         "CORE_UNSUPPORTED_LANGUAGE",
-        "Unsupported language: no available plugin found",
+        `Unsupported file extension: ${ext}`,
       );
 
     try {
@@ -61,6 +73,9 @@ class Parser {
     }
   }
 
+  /**
+   * Cleans up resources and resets the singleton instance
+   */
   public destroy(): void {
     this._plugins.clear();
     Parser._instance = undefined;

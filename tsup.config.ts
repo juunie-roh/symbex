@@ -6,7 +6,7 @@ export default defineConfig([
     dts: true,
     entry: [
       "src/index.ts",
-      "src/bin/index.ts",
+      "src/bin/spine.ts",
       "src/config/index.ts",
       "src/core/index.ts",
     ],

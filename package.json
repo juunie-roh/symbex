@@ -5,7 +5,7 @@
   "keywords": [],
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "bin": "dist/bin/index.js",
+  "bin": "dist/bin/spine.js",
   "files": [
     "dist"
   ],
@@ -21,8 +21,9 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky",
+    "run:dev": "node dist/bin",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "ts": "pnpm --filter @juun-roh/spine-typescript",
     "tsx": "pnpm --filter @juun-roh/spine-tsx"
   },

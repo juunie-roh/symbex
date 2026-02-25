@@ -11,13 +11,7 @@ const base: Config["rules"] = {
   "import/extensions": "off",
   "no-param-reassign": "off",
   "no-underscore-dangle": "off",
-  "prettier/prettier": [
-    "error",
-    {
-      singleQuote: false,
-      endOfLine: "auto",
-    },
-  ],
+  "prettier/prettier": ["error", { singleQuote: false, endOfLine: "auto" }],
 };
 
 const ts: Config["rules"] = {

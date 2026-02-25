@@ -1,16 +1,61 @@
 /* eslint-disable unused-imports/no-unused-imports */
 /* eslint-disable unused-imports/no-unused-vars */
 
+/* =========================
+   Import Statements
+========================= */
 import {
   named_import_1,
   named_import_2,
   named_import_3,
-  //@ts-expect-error mock import statement
-} from "source";
-//@ts-expect-error mock import statement
-import default_module from "source";
-//@ts-expect-error mock import statement
-import * as default_module_alias from "source";
+  named_import_4 as aliased_named_import_4,
+  //@ts-expect-error mock import source
+} from "import-source";
+//@ts-expect-error mock import source
+import default_module from "import-source";
+//@ts-expect-error mock import source
+import * as default_module_alias from "import-source";
+
+/* =========================
+   Functions
+========================= */
+function function_declaration() {}
+function function_declaration_with_params(params: any) {}
+function function_declaration_with_generics<T>(params: T) {}
+function function_declaration_with_native_return_type(): any {}
+function function_declaration_with_optional_param(a: number, b?: string) {}
+function function_declaration_with_default_param(a: number, b = 0) {}
+function function_declaration_with_rest_params(...args: number[]) {}
+function function_declaration_with_multiple_generics<T, U>(a: T, b: U): [T, U] {
+  return [a, b];
+}
+function function_declaration_with_generic_constraint<T extends object>(
+  a: T,
+): T {
+  return a;
+}
+function function_declaration_with_overloads(a: number): number;
+function function_declaration_with_overloads(a: string): string;
+function function_declaration_with_overloads(a: any): any {}
+function function_declaration_with_function_calls() {
+  function_declaration();
+  function_declaration_with_params(function_declaration());
+  function_declaration_with_params(() => {});
+}
+async function async_function_declaration() {}
+function* generator_function_declaration() {}
+
+const assigned_function = function () {};
+const assigned_function_with_params = function (params: any) {};
+const assigned_function_named = function named_fn() {};
+const arrow_function = () => {};
+const arrow_function_with_params = (a: number, b: string) => {};
+const arrow_function_with_return = (a: number): number => a;
+const arrow_function_with_body = (a: number): number => {
+  return a * 2;
+};
+const async_arrow_function = async () => {};
+const arrow_function_with_generics = <T>(a: T): T => a;
 
 /* =========================
    Primitive Types
@@ -80,7 +125,7 @@ let w: "a" | "b" = "a";
 /* =========================
    Functions
 ========================= */
-function function_declaration_with_params(
+function named_function_declaration_with_params(
   a: number,
   b = 1,
   ...c: number[]
@@ -235,5 +280,8 @@ namespace Z {
 /* =========================
    Modules / Imports / Exports
 ========================= */
-export { a, b, function_declaration_with_params as x };
+export { aliased_named_import_4 }; // re-exports
+//@ts-expect-error mock import source
+export * from "import-source";
+export { a, b, named_function_declaration_with_params as x };
 export default class_declaration;

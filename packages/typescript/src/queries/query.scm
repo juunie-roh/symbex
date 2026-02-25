@@ -71,3 +71,23 @@
   )
   source: (string) @source
 ) @import
+
+;; class declaration
+;; @decorator class @name<@generics> @heritage {@body}
+(class_declaration
+  decorator: (decorator)? @decorator
+  name: (type_identifier) @name
+  (class_heritage)? @heritage
+  type_parameters: (type_parameters)? @generics
+  body: (class_body) @body
+) @class
+
+;; abstract class declaration
+;; @decorator abstract class @name<@generics> @heritage {@body}
+(abstract_class_declaration
+  decorator: (decorator)? @decorator
+  name: (type_identifier) @name
+  (class_heritage)? @heritage
+  type_parameters: (type_parameters)? @generics
+  body: (class_body) @body
+) @abstract_class

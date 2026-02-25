@@ -19,20 +19,30 @@ type ImportHit = {
   node: Parser.SyntaxNode;
 };
 
+type ClassHit = {
+  name?: string;
+  generics?: string;
+  node: Parser.SyntaxNode;
+  body: Parser.SyntaxNode;
+};
+
 export function convert(tree: Parser.Tree, query: Query) {
   const root = tree.rootNode;
 
   const functions: FuncHit[] = [];
   const imports: ImportHit[] = [];
+  const classes: ClassHit[] = [];
   const calls: Parser.SyntaxNode[] = [];
 
   query.matches(root).forEach((match) => {
     let funcNode: Parser.SyntaxNode | null = null;
     let importNode: Parser.SyntaxNode | null = null;
+    let classNode: Parser.SyntaxNode | null = null;
     let body: Parser.SyntaxNode | null = null;
 
     const funcInfo: Partial<FuncHit> = { calls: [] };
     const importInfo: Partial<ImportHit> = {};
+    const classInfo: Partial<ClassHit> = {};
 
     for (const cap of match.captures) {
       switch (cap.name) {
@@ -41,6 +51,9 @@ export function convert(tree: Parser.Tree, query: Query) {
           break;
         case "import":
           importNode = cap.node;
+          break;
+        case "class":
+          classNode = cap.node;
           break;
         case "body":
           body = cap.node;
@@ -57,9 +70,11 @@ export function convert(tree: Parser.Tree, query: Query) {
         case "name":
           funcInfo.name = cap.node.text;
           importInfo.name = cap.node.text;
+          classInfo.name = cap.node.text;
           break;
         default:
           (funcInfo as any)[cap.name] = cap.node.text;
+          (classInfo as any)[cap.name] = cap.node.text;
       }
     }
 
@@ -73,6 +88,10 @@ export function convert(tree: Parser.Tree, query: Query) {
         source: importInfo.source,
         node: importNode,
       });
+    }
+
+    if (classNode && body) {
+      classes.push({ ...classInfo, node: classNode, body } as ClassHit);
     }
   });
 
@@ -117,7 +136,24 @@ export function convert(tree: Parser.Tree, query: Query) {
     source: imp.source,
   }));
 
-  return { functions: functionNodes, imports: importNodes };
+  const classNodes = classes.map((cls) => ({
+    file,
+    type: "class",
+    range: {
+      start: cls.node.startPosition,
+      end: cls.node.endPosition,
+    },
+    container: cls.node.parent?.type !== "program" ? cls.node.parent : null,
+
+    name: cls.name,
+    generics: cls.generics,
+  }));
+
+  return {
+    functions: functionNodes,
+    imports: importNodes,
+    classes: classNodes,
+  };
 }
 
 function contains(body: Parser.SyntaxNode, n: Parser.SyntaxNode) {

@@ -1,4 +1,4 @@
-import Parser, { type Query } from "tree-sitter";
+import type TSParser from "tree-sitter";
 
 type FuncHit = {
   name?: string;
@@ -6,39 +6,41 @@ type FuncHit = {
   params?: string;
   returnType?: string;
 
-  node: Parser.SyntaxNode;
-  body: Parser.SyntaxNode;
+  node: TSParser.SyntaxNode;
+  body: TSParser.SyntaxNode;
 
-  calls: Parser.SyntaxNode[];
+  calls: TSParser.SyntaxNode[];
 };
 
 type ImportHit = {
   name?: string;
   alias?: string;
   source: string;
-  node: Parser.SyntaxNode;
+  node: TSParser.SyntaxNode;
 };
 
 type ClassHit = {
   name?: string;
   generics?: string;
-  node: Parser.SyntaxNode;
-  body: Parser.SyntaxNode;
+  node: TSParser.SyntaxNode;
+  body: TSParser.SyntaxNode;
 };
 
-export function convert(tree: Parser.Tree, query: Query, file: string) {
-  const root = tree.rootNode;
-
+export function convert(
+  node: TSParser.SyntaxNode,
+  query: TSParser.Query,
+  filePath: string,
+) {
   const functions: FuncHit[] = [];
   const imports: ImportHit[] = [];
   const classes: ClassHit[] = [];
-  const calls: Parser.SyntaxNode[] = [];
+  const calls: TSParser.SyntaxNode[] = [];
 
-  query.matches(root).forEach((match) => {
-    let funcNode: Parser.SyntaxNode | null = null;
-    let importNode: Parser.SyntaxNode | null = null;
-    let classNode: Parser.SyntaxNode | null = null;
-    let body: Parser.SyntaxNode | null = null;
+  query.matches(node).forEach((match) => {
+    let funcNode: TSParser.SyntaxNode | null = null;
+    let importNode: TSParser.SyntaxNode | null = null;
+    let classNode: TSParser.SyntaxNode | null = null;
+    let body: TSParser.SyntaxNode | null = null;
 
     const funcInfo: Partial<FuncHit> = { calls: [] };
     const importInfo: Partial<ImportHit> = {};
@@ -102,7 +104,7 @@ export function convert(tree: Parser.Tree, query: Query, file: string) {
   }
 
   const functionNodes = functions.map((fn) => ({
-    file,
+    file: filePath,
     type: "function",
     range: {
       start: fn.node.startPosition,
@@ -122,7 +124,7 @@ export function convert(tree: Parser.Tree, query: Query, file: string) {
   }));
 
   const importNodes = imports.map((imp) => ({
-    file,
+    file: filePath,
     type: "import",
     range: {
       start: imp.node.startPosition,
@@ -135,7 +137,7 @@ export function convert(tree: Parser.Tree, query: Query, file: string) {
   }));
 
   const classNodes = classes.map((cls) => ({
-    file,
+    file: filePath,
     type: "class",
     range: {
       start: cls.node.startPosition,
@@ -154,7 +156,7 @@ export function convert(tree: Parser.Tree, query: Query, file: string) {
   };
 }
 
-function contains(body: Parser.SyntaxNode, n: Parser.SyntaxNode) {
+function contains(body: TSParser.SyntaxNode, n: TSParser.SyntaxNode) {
   return body.startIndex <= n.startIndex && n.endIndex <= body.endIndex;
 }
 
@@ -164,7 +166,7 @@ function contains(body: Parser.SyntaxNode, n: Parser.SyntaxNode) {
  */
 function findInnermostOwner(
   funcs: FuncHit[],
-  call: Parser.SyntaxNode,
+  call: TSParser.SyntaxNode,
 ): FuncHit | null {
   let best: FuncHit | null = null;
   let bestSpan = Infinity;
@@ -181,7 +183,7 @@ function findInnermostOwner(
   return best;
 }
 
-function isMemberCall(call: Parser.SyntaxNode): boolean {
+function isMemberCall(call: TSParser.SyntaxNode): boolean {
   if (call.type !== "call_expression") return false;
 
   // exclude optional chaining call
@@ -201,7 +203,7 @@ function isMemberCall(call: Parser.SyntaxNode): boolean {
   return false;
 }
 
-function hasAncestor(type: string, node: Parser.SyntaxNode): boolean {
+function hasAncestor(type: string, node: TSParser.SyntaxNode): boolean {
   let cur = node.parent;
   while (cur) {
     if (cur.type === type) return true;
@@ -210,7 +212,7 @@ function hasAncestor(type: string, node: Parser.SyntaxNode): boolean {
   return false;
 }
 
-function unwrap(node: Parser.SyntaxNode): Parser.SyntaxNode {
+function unwrap(node: TSParser.SyntaxNode): TSParser.SyntaxNode {
   let cur = node;
   while (true) {
     if (cur.type === "parenthesized_expression") {

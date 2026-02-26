@@ -5,5 +5,7 @@ const queryString: string = require("./queries/query.scm");
 
 const language = TypeScript.typescript;
 
-export { convert } from "./convert.js";
+export { capture } from "./capture";
+export { convert } from "./convert";
 export { language, queryString };
+export type * from "./models";

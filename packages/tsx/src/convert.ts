@@ -123,7 +123,7 @@ function contains(body: Parser.SyntaxNode, n: Parser.SyntaxNode) {
 }
 
 /**
- * call이 여러 body에 포함될 수 있음(중첩 함수).
+ * Call이 여러 body에 포함될 수 있음(중첩 함수).
  * 가장 안쪽(= body 범위가 가장 작은) 함수를 선택.
  */
 function findInnermostOwner(

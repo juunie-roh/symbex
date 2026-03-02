@@ -22,7 +22,7 @@ program
     const config = loadConfig(options.path);
     const parser = Parser.get(config);
     const tree = parser.parse(file);
-    // console.log(tree);
+    console.log(JSON.stringify(tree, null, 2));
 
     if (others) {
       others.forEach((f: string) => {

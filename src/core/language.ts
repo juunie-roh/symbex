@@ -62,7 +62,8 @@ class Language {
   }
 
   convert(filePath: string, node: TSParser.SyntaxNode) {
-    return this._module.capture(node, this._query, filePath);
+    const captures = this._module.capture(filePath, node, this._query);
+    return this._module.convert(captures);
   }
 }
 
@@ -72,7 +73,10 @@ namespace Language {
    */
   export interface Module {
     language: TSParser.Language;
-    queryString: string;
+    /**
+     * Temporary field.
+     * @todo Specify fields.
+     */
     [k: string]: any;
   }
 
@@ -106,14 +110,14 @@ namespace Language {
     return m;
   }
 
+  /**
+   *
+   * @param m A module to validate.
+   * @returns Whether the imported module satisfies the language module interface.
+   * @todo Specify module interface.
+   */
   function isModule(m: unknown): m is Module {
-    return (
-      typeof m === "object" &&
-      m !== null &&
-      "language" in m &&
-      "queryString" in m &&
-      typeof (m as Language.Module).queryString === "string"
-    );
+    return typeof m === "object" && m !== null && "language" in m;
   }
 }
 

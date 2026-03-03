@@ -14,11 +14,7 @@ interface Node<K extends string = string> {
    * A range of positions in a multi-line text document, specified both in terms of byte offsets and row/column positions.
    * @see {@link TSParser.Range | tree-sitter `Range`}
    */
-  range?: TSParser.Range;
-  /**
-   * Outgoing edges connecting this node to related nodes.
-   */
-  edges?: Edge[];
+  range: TSParser.Range;
   /**
    * Language-specific metadata supplement.
    */
@@ -38,6 +34,10 @@ interface Edge<K extends string = string> {
    * Kind of relationship this edge represents.
    */
   kind: K;
+  /**
+   * Language-specific metadata supplement.
+   */
+  meta?: Record<string, unknown>;
 }
 
 export type { Edge, Node };

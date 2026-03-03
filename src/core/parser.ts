@@ -66,7 +66,7 @@ class Parser {
     const language = this._languages.get(ext)!;
 
     const tree = language.parse(filePath, oldTree, options);
-    return language.convert(filePath, tree.rootNode);
+    return language.extract(filePath, tree.rootNode);
   }
 
   /**

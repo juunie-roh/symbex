@@ -22,7 +22,20 @@ program
     const config = loadConfig(options.path);
     const parser = Parser.get(config);
     const tree = parser.parse(file);
-    console.log(JSON.stringify(tree, null, 2));
+    console.log(`Edges: ${tree.edges.length}, Nodes: ${tree.nodes.length}`);
+    tree.edges.forEach((e) => {
+      console.log(`[EDGE]: ${e.from} ==== ${e.kind} ====> ${e.to}`);
+    });
+    tree.nodes.forEach((n) => {
+      console.log("====== [NODE] ======");
+      console.log(`ID:       ${n.id}`);
+      console.log(`NodeKind: ${n.kind}`);
+      console.log(`byte:     ${n.range.startIndex} to ${n.range.endIndex}`);
+      console.log(
+        `position: ${n.range.startPosition.row}:${n.range.startPosition.column} to ${n.range.endPosition.row}:${n.range.endPosition.column}`,
+      );
+      console.log(`meta:     ${n.meta ? JSON.stringify(n.meta) : "undefined"}`);
+    });
 
     if (others) {
       others.forEach((f: string) => {

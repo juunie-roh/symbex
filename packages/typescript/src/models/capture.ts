@@ -9,19 +9,21 @@ namespace Capture {
      * An identifier.
      */
     name?: string;
-
-    [k: string]: any;
   }
 
   export interface Function extends Base {
-    type_params?: string[];
+    type_params: string[];
     params: string[];
-    return_type?: string;
+    return_type: string;
   }
 
   export interface Call extends Base {}
 
-  export interface Class extends Base {}
+  export interface Class extends Base {
+    type_params: string[];
+    implements: string[];
+    extends: string[];
+  }
 
   export interface AbstractClass extends Base {}
 
@@ -37,6 +39,7 @@ namespace Capture {
   export interface Result {
     imports: Capture.Import[];
     functions: Capture.Function[];
+    classes: Capture.Class[];
   }
 }
 

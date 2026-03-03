@@ -55,15 +55,7 @@
 (class_declaration
   ;; decorator: (decorator)* @decorator
   name: (type_identifier) @name
-  (class_heritage
-    (implements_clause
-      (type) @target
-    )? @implements
-    (extends_clause
-      value: (expression) @target
-      type_arguments: (type_arguments)? @type_args
-    )? @extends
-  )? @heritage
+  (class_heritage)? @heritage
   type_parameters: (type_parameters)? @type_params
   body: (class_body) @body
 ) @class
@@ -74,15 +66,7 @@
 (abstract_class_declaration
   ;; decorator: (decorator)* @decorator
   name: (type_identifier) @name
-  (class_heritage
-    (implements_clause
-      (type) @target
-    )? @implements
-    (extends_clause
-      value: (expression) @target
-      type_arguments: (type_arguments)? @type_args
-    )? @extends
-  )? @heritage
+  (class_heritage)? @heritage
   type_parameters: (type_parameters)? @type_params
   body: (class_body) @body
 ) @abstract_class

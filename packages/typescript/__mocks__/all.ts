@@ -6,13 +6,15 @@
 ========================= */
 // @ts-expect-error: mock import source
 import default_module from "default-import-source";
+// @ts-expect-error: mock import source
+import with_attribute from "import-attr-source" with { type: "json" };
 import mixed_default_module, {
   mixed_named_import_1,
   mixed_named_import_2 as mixed_import_alias_2,
   // @ts-expect-error: mock import source
-} from "mixed-import-source";
+} from "mixed-import-source_1";
 // @ts-expect-error: mock import source
-import mixed_default_module_2, * as mixed_namespace from "mixed-import-source";
+import mixed_default_module_2, * as mixed_namespace from "mixed-import-source_2";
 // @ts-expect-error: mock import source
 import { default as default_module_alias } from "named-import-default";
 import {
@@ -66,6 +68,9 @@ const arrow_function_with_body = (a: number): number => {
 const async_arrow_function = async () => {};
 const arrow_function_with_generics = <T>(a: T): T => a;
 
+(function () {})();
+(function iife() {})();
+
 /* =========================
    Nested Declarations
 ========================= */
@@ -84,6 +89,24 @@ function nested_function() {
 ========================= */
 
 export function exported_function() {}
+
+/* =========================
+   Call Expressions
+========================= */
+function_declaration();
+function_declaration_with_params(1);
+function_declaration_with_optional_param(1, "a");
+function_declaration_with_generics<number>(1);
+function_declaration_with_multiple_generics<number, string>(1, "a");
+z<string>("a");
+
+const call_result = function_declaration_with_native_return_type();
+const chained_call = assigned_function_named();
+const nested_call = function_declaration_with_params(
+  function_declaration_with_native_return_type(),
+);
+const spread_call = function_declaration_with_rest_params(...[1, 2, 3]);
+const optional_call = (null as unknown as typeof function_declaration)?.();
 
 /* =========================
    Primitive Types
@@ -207,11 +230,17 @@ class D extends class_declaration implements A {
   a = 1;
 }
 
+const obj = new class_declaration(1, "a", true);
+const obj_call = obj.e();
+
 /* =========================
    Abstract Class
 ========================= */
 abstract class abstract_class_declaration {
   abstract abstract_method(): void;
+  private static private_static_method() {}
+  abstract abstract_arrow: () => void;
+  protected abstract protected_abstract(): void;
 }
 
 /* =========================

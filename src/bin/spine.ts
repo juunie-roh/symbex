@@ -3,8 +3,7 @@
 import { program } from "commander";
 
 import { loadConfig } from "@/config";
-import { Parser } from "@/core";
-import { Graph } from "@/core/graph";
+import { Graph, Parser } from "@/core";
 
 import pkg from "../../package.json";
 
@@ -14,6 +13,7 @@ program
   .argument("<file>", "a target file name to parse")
   .argument("[others...]", "additional files")
   .option("-l, --list", "print a list of nodes", true)
+  .option("-o, --output <output>", "output file name", "spine-output.txt")
   .option(
     "-p, --path <config-path>",
     "specify path of configuration",

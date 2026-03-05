@@ -8,8 +8,6 @@ import { CoreError } from "./error";
 import { Language } from "./language";
 
 class Parser {
-  private static _instance: Parser | undefined;
-
   private _languages: Map<string, Language>;
 
   private constructor(config: Config) {
@@ -24,18 +22,14 @@ class Parser {
    * @param config Required on first call to initialize the parser; ignored thereafter.
    * @throws If called for the first time without a config.
    */
-  static get(config?: Config): Parser {
-    if (!this._instance) {
-      if (!config)
-        throw new CoreError(
-          "CORE_NO_CONFIG",
-          "Configuration must be specified for initialization",
-        );
+  static create(config?: Config): Parser {
+    if (!config)
+      throw new CoreError(
+        "CORE_NO_CONFIG",
+        "Configuration must be specified for initialization",
+      );
 
-      this._instance = new Parser(config);
-    }
-
-    return this._instance;
+    return new Parser(config);
   }
   /**
    * {@link Language | spine `Language`} instances keyed by file extension.
@@ -74,7 +68,6 @@ class Parser {
    */
   destroy(): void {
     this._languages.clear();
-    Parser._instance = undefined;
   }
 }
 

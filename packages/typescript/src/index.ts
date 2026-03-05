@@ -1,7 +1,9 @@
+import { normalizeQuery } from "@juun-roh/spine/utils";
 import TypeScript from "tree-sitter-typescript";
 
-// biome-ignore lint/suspicious/noCommonJs: esbuild text loader bundles this as a string at build time
-const queryString: string = require("./queries/query.scm");
+import query from "./queries/query.scm";
+
+const queryString = normalizeQuery(query);
 
 const language = TypeScript.typescript;
 

@@ -4,7 +4,6 @@ namespace Capture {
   export interface Base {
     id: string;
     node: TSParser.SyntaxNode;
-    body?: Result;
     /**
      * An identifier.
      */
@@ -12,6 +11,7 @@ namespace Capture {
   }
 
   export interface Function extends Base {
+    body: Result;
     type_params: string[];
     params: string[];
     return_type?: string;
@@ -20,6 +20,7 @@ namespace Capture {
   export interface Call extends Base {}
 
   export interface Class extends Base {
+    body: Result;
     type_params: string[];
     implements: string[];
     extends: string[];

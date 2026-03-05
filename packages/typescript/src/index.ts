@@ -1,9 +1,6 @@
-import { normalizeQuery } from "@juun-roh/spine/utils";
 import TypeScript from "tree-sitter-typescript";
 
-import query from "./queries/query.scm";
-
-const queryString = normalizeQuery(query);
+import { queryString } from "./query";
 
 const language = TypeScript.typescript;
 

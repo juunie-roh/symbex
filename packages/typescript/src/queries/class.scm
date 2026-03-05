@@ -1,72 +1,3 @@
-;; Catch errors
-(ERROR) @error
-
-;; imports
-;; import { @name as @alias } from "@source";
-;; import * as @name from "@source";
-;; import @name from "@source";
-(import_statement
-  (import_clause
-    (named_imports 
-      (import_specifier 
-        name: (identifier) @name 
-        alias: (identifier)? @alias
-      )
-    )?
-    (namespace_import (identifier) @name)?
-    (identifier)? @name
-  )?
-  source: (string (string_fragment) @source)
-) @import
-
-(expression_statement
-  (call_expression
-    function: (identifier) @name
-    arguments: (arguments (identifier) @arg)* @args
-  )?
-) @calls
-
-;; function declaration
-;; function @name<@type_params>(@params): @return_type @body
-(function_declaration
-    name: (identifier) @name
-    type_parameters: (type_parameters)? @type_params
-    parameters: (formal_parameters) @params
-    return_type: (type_annotation)? @return_type
-    body: (statement_block) @body
-) @function
-
-;; arrow function / function expression
-;; const @name = <@type_params>(@params): @return_type => @body
-;; const @name = <@type_params>(@params): @return_type => @body
-;; const @name = @params: @return_type => @body (single identifier param)
-;; const @name = function <@type_params>(@params): @return_type @body
-(lexical_declaration
-  (variable_declarator
-    name: (identifier) @name
-    value: [
-      (arrow_function
-        type_parameters: (type_parameters)? @type_params
-        parameters: [
-          (formal_parameters)? @params
-          (identifier)? @params
-        ]
-        return_type: (type_annotation)? @return_type
-        body: [
-          (statement_block) @body
-          (expression) @body
-        ]
-      )
-      (function_expression
-        type_parameters: (type_parameters)? @type_params
-        parameters: (formal_parameters) @params
-        return_type: (type_annotation)? @return_type
-        body: (statement_block) @body
-      )
-    ]
-  )
-) @function
-
 ;; class declaration
 ;; class @name<@type_params> @heritage @body
 ;; @heritage = impelents @target, @target, ... || extends @target<@type_args>, @target, ...
@@ -89,7 +20,6 @@
   body: (class_body) @body
 ) @abstract_class
 
-;; class body node
 (class_body
   ;; decorator: (decorator)* @decorator
   ;; methods
@@ -145,13 +75,3 @@
     value: (_)? @value ;; filter out function_expression and arrow_expression types
   )? @field
 )?
-
-;; type parameters
-;; TODO: specify later
-;; (type_parameters
-;;   (type_parameter
-;;     name: (type_identifier) @name
-;;     constraint: (constraint (type) @constraint)?
-;;     value: (default_type (type) @default_type)?
-;;   )*
-;; ) @type_params

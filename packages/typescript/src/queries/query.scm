@@ -2,9 +2,9 @@
 (ERROR) @error
 
 ;; imports
-;; import { @name as @alias } from @source;
-;; import * as @name from @source;
-;; import @name from @source;
+;; import { @name as @alias } from "@source";
+;; import * as @name from "@source";
+;; import @name from "@source";
 (import_statement
   (import_clause
     (named_imports 
@@ -15,8 +15,8 @@
     )?
     (namespace_import (identifier) @name)?
     (identifier)? @name
-  )? @names
-  source: (string) @source
+  )?
+  source: (string (string_fragment) @source)
 ) @import
 
 (expression_statement

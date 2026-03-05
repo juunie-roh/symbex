@@ -1,7 +1,7 @@
 import type { Capture, Edge, Node } from "@/models";
 
 function convertImports(
-  imports: Capture.Import[],
+  captures: Capture.Import[],
   parentId: string,
 ): {
   edges: Edge[];
@@ -9,28 +9,58 @@ function convertImports(
 } {
   const edges: Edge[] = [];
   const nodes: Node[] = [];
+  const sources = new Set<string>();
 
-  for (const imp of imports) {
-    const range: Node["range"] = {
-      startIndex: imp.node.startIndex,
-      endIndex: imp.node.endIndex,
-      startPosition: imp.node.startPosition,
-      endPosition: imp.node.endPosition,
-    };
+  for (const captured of captures) {
+    const { source, name, type, alias } = captured;
+    if (!sources.has(source)) {
+      sources.add(source);
+    }
 
+    const representative = alias ? alias : name;
+    const defId = `${parentId}:${representative}`;
+
+    if (representative) {
+      // defines
+      edges.push({
+        from: parentId,
+        to: defId,
+        kind: "defines",
+        resolved: true,
+      } satisfies Edge);
+
+      nodes.push({
+        id: defId,
+        kind: "variable",
+        props: alias
+          ? {
+              alias_of: name,
+            }
+          : undefined,
+      } satisfies Node);
+    }
+
+    // import relationship
     edges.push({
-      from: parentId,
-      to: imp.source,
+      from: representative ? defId : parentId,
+      to: source,
       kind: "imports",
+      resolved: true,
+      props: type
+        ? {
+            type,
+          }
+        : undefined,
     } satisfies Edge);
-
-    nodes.push({
-      id: imp.source,
-      kind: "module",
-      range,
-      props: { names: imp.names },
-    } satisfies Node);
   }
+
+  // deduplicated source nodes
+  sources.forEach((source) => {
+    nodes.push({
+      id: source,
+      kind: "module",
+    } satisfies Node);
+  });
 
   return { edges, nodes };
 }

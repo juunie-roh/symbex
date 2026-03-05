@@ -4,34 +4,19 @@ import { Capture } from "@/models";
 
 import { getMatches, getNode, groupMatches } from "./utils";
 
-/**
- * Parse a single import clause child node into its {@link Capture.Import} name entries.
- */
-function parseNames(
-  node: TSParser.SyntaxNode,
-): NonNullable<Capture.Import["names"]> {
-  if (node.type === "identifier") {
-    return [{ type: "default", name: node.text }];
+function parseType(node?: TSParser.SyntaxNode): Capture.Import["type"] {
+  if (!node || !node.parent) return;
+
+  switch (node.parent.type) {
+    case "import_clause":
+      return "default";
+    case "import_specifier":
+      return "named_imports";
+    case "namespace_import":
+      return "namespace_import";
+    default:
+      return undefined;
   }
-  if (node.type === "named_imports") {
-    return node.namedChildren
-      .filter((c) => c.type === "import_specifier")
-      .map((f) => ({
-        type: "named_imports",
-        name: f.childForFieldName("name")!.text,
-        alias: f.childForFieldName("alias")?.text,
-      }));
-  }
-  if (node.type === "namespace_import") {
-    return [
-      {
-        type: "namespace_import",
-        name: "*",
-        alias: node.firstNamedChild?.text,
-      },
-    ];
-  }
-  return [];
 }
 
 function getImports(
@@ -47,8 +32,10 @@ function getImports(
     return {
       id: parentId,
       node: get("import")!,
-      names: get("names")?.namedChildren.flatMap(parseNames),
-      source: get("source")!.firstNamedChild!.text,
+      name: get("name")?.text,
+      alias: get("alias")?.text,
+      type: parseType(get("name")),
+      source: get("source")!.text,
     } satisfies Capture.Import;
   });
 }

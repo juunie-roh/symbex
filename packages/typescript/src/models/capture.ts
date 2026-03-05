@@ -28,12 +28,9 @@ namespace Capture {
   export interface AbstractClass extends Base {}
 
   export interface Import extends Base {
-    names?: {
-      type: "default" | "named_imports" | "namespace_import";
-      name: string;
-      alias?: string;
-    }[];
     source: string;
+    type?: "default" | "named_imports" | "namespace_import";
+    alias?: string;
   }
 
   export interface Result {

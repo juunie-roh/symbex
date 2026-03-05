@@ -10,6 +10,7 @@ export default defineConfig([
       "src/config/index.ts",
       "src/core/index.ts",
       "src/utils/index.ts",
+      "src/utils/query/index.ts",
     ],
     format: "cjs",
     minify: true,

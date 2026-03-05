@@ -2,7 +2,7 @@
  * Strips comments and normalizes whitespace from a tree-sitter query string.
  * Removes `;;` and `;` line comments, then collapses surrounding whitespace.
  */
-function normalizeQuery(query: string): string {
+function normalize(query: string): string {
   return query
     .split("\n")
     .map((line) => line.replace(/;.*$/, "").trimEnd())
@@ -12,4 +12,4 @@ function normalizeQuery(query: string): string {
     .trim();
 }
 
-export { normalizeQuery };
+export { normalize };

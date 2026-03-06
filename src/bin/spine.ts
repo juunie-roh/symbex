@@ -36,8 +36,7 @@ program
     }
 
     if (options.dot) {
-      const name = typeof options.dot === "string" ? options.dot : undefined;
-      // console.log(graph.toDot(name));
+      console.log(parser.toDot(file, graph));
     }
 
     if (others) {

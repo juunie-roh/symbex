@@ -58,7 +58,7 @@ class Parser {
     this._languages.clear();
   }
   // TEMPORARY
-  graphToDot<N extends Node = Node, E extends Edge = Edge>(
+  toDot<N extends Node = Node, E extends Edge = Edge>(
     filePath: string,
     graph: Graph<N, E>,
   ) {

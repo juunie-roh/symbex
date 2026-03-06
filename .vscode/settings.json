@@ -8,6 +8,7 @@
   "cSpell.words": [
     "cesiumjs",
     "commitlint",
+    "CXXFLAGS",
     "Czml",
     "geospatial",
     "nodenext",
@@ -26,7 +27,6 @@
     "**/node_modules": true,
     "**/.pnp.*": true
   },
-  "typescript.enablePromptUseWorkspaceTsdk": true,
   "[css]": {
     "editor.suggest.insertMode": "replace",
     "editor.defaultFormatter": "esbenp.prettier-vscode",

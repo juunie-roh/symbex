@@ -99,7 +99,8 @@ const queryString = merge(classQuery, functionQuery, importQuery, ...);
 
 ```bash
 # Install
-pnpm install
+# for Node 24 or higher, tree-sitter requires c++ or higher to be built
+CXXFLAGS="-std=c++20" pnpm install
 
 # Build everything
 pnpm build && pnpm -r build

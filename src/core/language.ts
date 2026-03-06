@@ -3,6 +3,7 @@ import TSParser from "tree-sitter";
 import { Edge, Node } from "@/models";
 
 import { CoreError } from "./error";
+import type { Graph } from "./graph";
 
 /**
  * Represents a loaded and initialized spine language plugin.
@@ -68,6 +69,10 @@ class Language {
   ): { edges: Edge[]; nodes: Node[] } {
     const captures = this._module.capture(node, this._query, filePath);
     return this._module.convert(captures, filePath);
+  }
+
+  toDot<N extends Node = Node, E extends Edge = Edge>(graph: Graph<N, E>) {
+    return this._module.toDot(graph);
   }
 }
 

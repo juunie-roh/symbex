@@ -1,11 +1,25 @@
+import type { Node } from "@/models";
 import { Edge } from "@/models";
 
 import { GraphError } from "./error";
 import { Graph } from "./graph";
-import type { NodeID, ResolvedEdge } from "./types";
-import { isEdge } from "./types";
 
-function parent(id: NodeID): NodeID | undefined {
+type ResolvedEdge<E extends Edge> = E & {
+  to: Node["id"];
+  resolved: true;
+};
+
+function isEdge(item: any): item is Edge {
+  return (
+    "from" in item &&
+    "to" in item &&
+    "kind" in item &&
+    "resolved" in item &&
+    typeof item.resolved === "boolean"
+  );
+}
+
+function parent(id: Node["id"]): Node["id"] | undefined {
   const i = id.lastIndexOf(":");
   return i > 0 ? id.slice(0, i) : undefined;
 }
@@ -13,25 +27,32 @@ function parent(id: NodeID): NodeID | undefined {
 /**
  *
  */
-function resolve(graph: Graph, edge: Edge): ResolvedEdge;
+function resolve<N extends Node = Node, E extends Edge = Edge>(
+  graph: Graph<N, E>,
+  edge: E,
+): ResolvedEdge<E>;
 /**
  *
  */
-function resolve(graph: Graph, name: string, from: NodeID): NodeID;
-function resolve(
-  graph: Graph,
-  item: Edge | string,
-  from?: NodeID,
-): ResolvedEdge | NodeID {
+function resolve<N extends Node = Node, E extends Edge = Edge>(
+  graph: Graph<N, E>,
+  name: string,
+  from: Node["id"],
+): Node["id"];
+function resolve<N extends Node = Node, E extends Edge = Edge>(
+  graph: Graph<N, E>,
+  item: E | string,
+  from?: Node["id"],
+): ResolvedEdge<E> | Node["id"] {
   if (isEdge(item)) {
     // item is Edge
-    if (item.resolved) return item as ResolvedEdge;
+    if (item.resolved) return item as ResolvedEdge<E>;
 
     return {
       ...item,
       to: resolve(graph, item.to, item.from),
       resolved: true,
-    } satisfies ResolvedEdge;
+    } satisfies ResolvedEdge<E>;
   } else {
     // resolve id by name
     const name = item;
@@ -58,3 +79,4 @@ function resolve(
 }
 
 export { resolve };
+export type { ResolvedEdge };

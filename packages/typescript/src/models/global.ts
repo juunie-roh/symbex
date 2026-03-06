@@ -22,4 +22,6 @@ type EdgeKind = "imports" | "calls" | "implements" | "extends" | "defines";
  */
 type Edge = Spine.Edge<EdgeKind>;
 
-export type { Edge, EdgeKind, Node, NodeKind };
+type Graph = Spine.Graph<Node, Edge>;
+
+export type { Edge, EdgeKind, Graph, Node, NodeKind };

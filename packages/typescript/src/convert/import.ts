@@ -35,6 +35,7 @@ function convertImports(
         props: alias
           ? {
               alias_of: name,
+              source,
             }
           : undefined,
       } satisfies Node);
@@ -42,7 +43,7 @@ function convertImports(
 
     // import relationship
     edges.push({
-      from: representative ? defId : parentId,
+      from: parentId,
       to: source,
       kind: "imports",
       resolved: true,

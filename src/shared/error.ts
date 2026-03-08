@@ -15,7 +15,10 @@ type SpineErrorCode =
   | "GRAPH_NO_NODE"
   | "GRAPH_UNRESOLVED_EDGE"
   | "GRAPH_EDGE_RESOLUTION_FAILED"
-  | "GRAPH_UNDEFINED_INSTANCE";
+  | "GRAPH_UNDEFINED_INSTANCE"
+  // query
+  | "QUERY_DUPLICATE_KEY"
+  | "QUERY_INVALID_KEY";
 
 class SpineError extends Error {
   readonly code: SpineErrorCode;

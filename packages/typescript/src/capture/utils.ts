@@ -1,6 +1,6 @@
 import type TSParser from "tree-sitter";
 
-import { QueryTag } from "@/models";
+import type { QueryTag, QueryType } from "@/models";
 
 /**
  * Get 1-depth children of a given node.
@@ -25,7 +25,7 @@ function getMatches(
  * Group the matches by a tag.
  */
 function groupMatches(
-  by: QueryTag | string,
+  by: QueryType | string,
   from: TSParser.QueryMatch[],
 ): TSParser.QueryMatch[] {
   return from.filter((match) =>
@@ -40,4 +40,18 @@ function getNode(by: string, from: TSParser.QueryMatch) {
   return from.captures.find((c) => c.name === by)?.node;
 }
 
-export { getMatches, getNode, groupMatches };
+/**
+ * Create type-safe getter looking up a name within {@link TSParser.QueryCapture | captures} of {@link TSParser.QueryMatch | match}.
+ */
+function createGetter<Q extends keyof QueryTag>(match: TSParser.QueryMatch) {
+  function get(tag: QueryTag[Q]["required"]): TSParser.SyntaxNode;
+  function get(tag: QueryTag[Q]["optional"]): TSParser.SyntaxNode | undefined;
+  function get(
+    tag: string,
+  ): TSParser.SyntaxNode | TSParser.SyntaxNode[] | undefined {
+    return match.captures.find((c) => c.name === tag)?.node;
+  }
+  return get;
+}
+
+export { createGetter, getMatches, getNode, groupMatches };

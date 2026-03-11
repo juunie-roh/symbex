@@ -1,70 +1,87 @@
-import type { Capture, CaptureResult, Edge, Node } from "@/models";
+import { createCanonicalId } from "@juun-roh/spine/utils";
+
+import { capture } from "@/capture";
+import type { Capture, Edge, Node } from "@/models";
 
 import { convert } from "./convert";
 
-function convertClassBody(
-  body: { methods: Capture<"method">[]; members: Capture<"member">[] },
+function convertMethod(
+  methods: Capture<"method">[],
   parentId: string,
 ): { edges: Edge[]; nodes: Node[] } {
   const edges: Edge[] = [];
   const nodes: Node[] = [];
 
-  for (const method of body.methods) {
+  for (const method of methods) {
+    const id = createCanonicalId(parentId, method.name.text);
     edges.push({
       from: parentId,
-      to: method.id,
+      to: id,
       kind: "defines",
       resolved: true,
     } satisfies Edge);
 
     nodes.push({
-      id: method.id,
+      id: id,
       kind: "method",
       range: {
-        startIndex: method.node.startIndex,
-        endIndex: method.node.endIndex,
-        startPosition: method.node.startPosition,
-        endPosition: method.node.endPosition,
+        startIndex: method.method.startIndex,
+        endIndex: method.method.endIndex,
+        startPosition: method.method.startPosition,
+        endPosition: method.method.endPosition,
       },
+
       props: {
-        name: method.name,
-        modifier: method.modifier,
-        is_static: method.is_static,
-        type_params: method.type_params,
-        params: method.params,
-        return_type: method.return_type,
+        name: method.name.text,
+        modifier: method.modifier?.text ?? "public",
+        is_static: method.is_static ? true : false,
+        is_async: method.is_async ? true : false,
+        type_params: method.type_params?.text,
+        params: method.params?.text,
+        return_type: method.return_type?.text,
       },
     } satisfies Node);
 
     if (method.body) {
-      const nested = convert(method.body as CaptureResult, method.id);
+      const nested = convert(capture(method.body), id);
       edges.push(...nested.edges);
       nodes.push(...nested.nodes);
     }
   }
 
-  for (const member of body.members) {
+  return { edges, nodes };
+}
+
+function convertMember(
+  members: Capture<"member">[],
+  parentId: string,
+): { edges: Edge[]; nodes: Node[] } {
+  const edges: Edge[] = [];
+  const nodes: Node[] = [];
+  for (const member of members) {
+    const id = createCanonicalId(parentId, member.name.text);
+
     edges.push({
       from: parentId,
-      to: member.id,
+      to: id,
       kind: "defines",
       resolved: true,
     } satisfies Edge);
 
     nodes.push({
-      id: member.id,
+      id,
       kind: "member",
       range: {
-        startIndex: member.node.startIndex,
-        endIndex: member.node.endIndex,
-        startPosition: member.node.startPosition,
-        endPosition: member.node.endPosition,
+        startIndex: member.member.startIndex,
+        endIndex: member.member.endIndex,
+        startPosition: member.member.startPosition,
+        endPosition: member.member.endPosition,
       },
       props: {
-        name: member.name,
-        modifier: member.modifier,
-        is_static: member.is_static,
-        type: member.type,
+        name: member.name.text,
+        modifier: member.modifier?.text,
+        is_static: member.is_static ? true : false,
+        type: member.type?.text,
       },
     } satisfies Node);
   }
@@ -84,40 +101,37 @@ function convertClasses(
 
   if (classes.length > 0) {
     for (const cls of classes) {
+      const id = createCanonicalId(parentId, cls.name.text);
+
       edges.push({
         from: parentId,
-        to: cls.id,
+        to: id,
         kind: "defines",
         resolved: true,
       } satisfies Edge);
 
       nodes.push({
-        id: cls.id,
+        id,
         kind: "class",
         range: {
-          startIndex: cls.node.startIndex,
-          endIndex: cls.node.endIndex,
-          startPosition: cls.node.startPosition,
-          endPosition: cls.node.endPosition,
+          startIndex: cls.class.startIndex,
+          endIndex: cls.class.endIndex,
+          startPosition: cls.class.startPosition,
+          endPosition: cls.class.endPosition,
         },
         props: {
-          name: cls.name,
-          type_params: cls.type_params,
-          extends: cls.extends,
-          implements: cls.implements,
+          name: cls.name.text,
+          type_params: cls.type_params?.text,
+          extends: cls.extends?.text,
+          implements: cls.implements?.text,
         },
       } satisfies Node);
 
       if (cls.body) {
-        const nested = convertClassBody(
-          cls.body as {
-            methods: Capture<"method">[];
-            members: Capture<"member">[];
-          },
-          cls.id,
-        );
-        edges.push(...nested.edges);
-        nodes.push(...nested.nodes);
+        const methods = convertMethod(capture(cls.body, "method"), id);
+        const members = convertMember(capture(cls.body, "member"), id);
+        edges.push(...methods.edges, ...members.edges);
+        nodes.push(...methods.nodes, ...members.nodes);
       }
     }
   }
@@ -125,4 +139,4 @@ function convertClasses(
   return { edges, nodes };
 }
 
-export { convertClassBody, convertClasses };
+export { convertClasses };

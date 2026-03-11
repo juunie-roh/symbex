@@ -15,15 +15,15 @@ function convertImports(
 
   for (const captured of captures) {
     const { source, name, type, alias } = captured;
-    if (!sources.has(source as string)) {
-      sources.add(source as string);
+    if (!sources.has(source.text)) {
+      sources.add(source.text);
     }
 
-    const representative = alias ? alias : name;
+    const representative = alias ? alias.text : name.text;
 
     if (representative) {
       // defines
-      const defId = createCanonicalId(parentId, representative as string);
+      const defId = createCanonicalId(parentId, representative);
       edges.push({
         from: parentId,
         to: defId,
@@ -36,8 +36,8 @@ function convertImports(
         kind: "variable",
         props: alias
           ? {
-              alias_of: name,
-              source,
+              alias_of: name.text,
+              source: source.text,
             }
           : undefined,
       } satisfies Node);
@@ -46,7 +46,7 @@ function convertImports(
     // import relationship
     edges.push({
       from: parentId,
-      to: source as string,
+      to: source.text,
       kind: "imports",
       resolved: true,
       props: type

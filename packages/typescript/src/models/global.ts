@@ -1,5 +1,4 @@
 import type * as Spine from "@juun-roh/spine";
-import type TSParser from "tree-sitter";
 
 // TODO: specify other declaration kinds
 type NodeKind =
@@ -40,7 +39,7 @@ type QueryTag = {
   };
   function: {
     required: "function" | "name" | "params" | "body";
-    optional: "type_params" | "return_type";
+    optional: "is_async" | "type_params" | "return_type";
   };
   import: {
     required: "import" | "name" | "source";
@@ -52,7 +51,12 @@ type QueryTag = {
   };
   method: {
     required: "method" | "name" | "body" | "params";
-    optional: "modifier" | "is_static" | "type_params" | "return_type";
+    optional:
+      | "modifier"
+      | "is_static"
+      | "is_async"
+      | "type_params"
+      | "return_type";
   };
   params: {
     required: string;
@@ -64,17 +68,8 @@ type QueryTag = {
   };
 };
 
-type QueryType = keyof QueryTag;
-
-type Capture<K extends keyof QueryTag> = {
-  id: string;
-  node: TSParser.SyntaxNode;
-} & Record<Exclude<QueryTag[K]["required"], K>, unknown> &
-  Partial<Record<QueryTag[K]["optional"], unknown>>;
-
-type CaptureResult = {
-  [K in keyof QueryTag]: Capture<K>[];
-};
+type Capture<K extends keyof QueryTag> = Spine.Capture<QueryTag[K]>;
+type CaptureResult = Spine.CaptureResult<QueryTag>;
 
 export type {
   Capture,
@@ -85,5 +80,4 @@ export type {
   Node,
   NodeKind,
   QueryTag,
-  QueryType,
 };

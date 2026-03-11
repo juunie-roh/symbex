@@ -1,4 +1,4 @@
-import { Graph } from "@/models";
+import { Graph } from "@/types";
 
 /**
  * Outputs the graph in DOT format for visualization with Graphviz or compatible tools.

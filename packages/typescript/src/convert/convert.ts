@@ -1,4 +1,4 @@
-import type { CaptureResult, Edge, Node } from "@/models";
+import type { CaptureResult, Edge, Node } from "@/types";
 
 import { convertClasses } from "./class";
 import { convertFunctions } from "./function";

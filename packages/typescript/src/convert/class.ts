@@ -1,7 +1,7 @@
 import { createCanonicalId } from "@juun-roh/spine/utils";
 
 import { capture } from "@/capture";
-import type { Capture, Edge, Node } from "@/models";
+import type { Capture, Edge, Node } from "@/types";
 
 import { convert } from "./convert";
 

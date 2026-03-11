@@ -1,6 +1,6 @@
 import { createCanonicalId } from "@juun-roh/spine/utils";
 
-import type { Capture, Edge, Node } from "@/models";
+import type { Capture, Edge, Node } from "@/types";
 
 function convertVariables(
   variables: Capture<"variable">[],

@@ -49,9 +49,9 @@ jobs:
           CXXFLAGS: -std=c++20
 
       - name: Build packages
-        run: pnpm build && pnpm -r build
+        run: pnpm build:all
       - name: Check types
-        run: pnpm -r check-types && pnpm check-types
+        run: pnpm check-types:all
       - name: Run linter
         run: pnpm lint
 

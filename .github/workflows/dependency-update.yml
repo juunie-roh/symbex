@@ -1,0 +1,25 @@
+name: Dependency Update
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sundays
+env:
+  HUSKY: 0
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - name: Update dependencies
+        run: pnpm up -r
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          title: 'ci(deps): Weekly dependency updates'
+          body: 'ci(deps): Automated dependency updates'
+          branch: 'deps/weekly-updates'
+        env:
+          HUSKY: 0

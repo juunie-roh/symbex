@@ -62,6 +62,7 @@ export default defineConfig([
     "**/dist/**",
     "**/build/**",
     "**/coverage/**",
+    "**/docs/**",
   ]),
   {
     files: ["**/*.{js,ts}"],

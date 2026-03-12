@@ -474,52 +474,52 @@ svg.call(zoom);
 const SAMPLE_DATA = {
   nodes: [
     { id: 'src/core/parser.ts', kind: 'file' },
-    { id: 'src/core/parser.ts::class::Parser', kind: 'class' },
-    { id: 'src/core/parser.ts::class::Parser::method::parse', kind: 'method' },
+    { id: 'src/core/parser.ts|class|Parser', kind: 'class' },
+    { id: 'src/core/parser.ts|class|Parser|method|parse', kind: 'method' },
     { id: 'src/core/language.ts', kind: 'file' },
-    { id: 'src/core/language.ts::class::Language', kind: 'class' },
-    { id: 'src/core/language.ts::class::Language::method::extract', kind: 'method' },
-    { id: 'src/core/language.ts::class::Language::method::parse', kind: 'method' },
+    { id: 'src/core/language.ts|class|Language', kind: 'class' },
+    { id: 'src/core/language.ts|class|Language|method|extract', kind: 'method' },
+    { id: 'src/core/language.ts|class|Language|method|parse', kind: 'method' },
     { id: 'src/core/graph/graph.ts', kind: 'file' },
-    { id: 'src/core/graph/graph.ts::class::Graph', kind: 'class' },
-    { id: 'src/core/graph/graph.ts::class::Graph::method::addNode', kind: 'method' },
-    { id: 'src/core/graph/graph.ts::class::Graph::method::addEdge', kind: 'method' },
-    { id: 'src/core/graph/graph.ts::class::Graph::method::serialize', kind: 'method' },
+    { id: 'src/core/graph/graph.ts|class|Graph', kind: 'class' },
+    { id: 'src/core/graph/graph.ts|class|Graph|method|addNode', kind: 'method' },
+    { id: 'src/core/graph/graph.ts|class|Graph|method|addEdge', kind: 'method' },
+    { id: 'src/core/graph/graph.ts|class|Graph|method|serialize', kind: 'method' },
     { id: 'src/models/global.ts', kind: 'file' },
-    { id: 'src/models/global.ts::type::Node', kind: 'type' },
-    { id: 'src/models/global.ts::type::Edge', kind: 'type' },
+    { id: 'src/models/global.ts|type|Node', kind: 'type' },
+    { id: 'src/models/global.ts|type|Edge', kind: 'type' },
     { id: 'src/utils/factory.ts', kind: 'file' },
-    { id: 'src/utils/factory.ts::function::createCapture', kind: 'function' },
+    { id: 'src/utils/factory.ts|function|createCapture', kind: 'function' },
     { id: 'packages/typescript/src/capture.ts', kind: 'file' },
-    { id: 'packages/typescript/src/capture.ts::variable::capture', kind: 'variable' },
+    { id: 'packages/typescript/src/capture.ts|variable|capture', kind: 'variable' },
     { id: 'packages/typescript/src/convert/convert.ts', kind: 'file' },
-    { id: 'packages/typescript/src/convert/convert.ts::function::convert', kind: 'function' },
+    { id: 'packages/typescript/src/convert/convert.ts|function|convert', kind: 'function' },
     { id: 'tree-sitter', kind: 'module' },
     { id: 'semdex', kind: 'module' },
   ],
   edges: [
-    { from: 'src/core/parser.ts', to: 'src/core/parser.ts::class::Parser', kind: 'defines', resolved: true },
-    { from: 'src/core/parser.ts::class::Parser', to: 'src/core/parser.ts::class::Parser::method::parse', kind: 'defines', resolved: true },
-    { from: 'src/core/language.ts', to: 'src/core/language.ts::class::Language', kind: 'defines', resolved: true },
-    { from: 'src/core/language.ts::class::Language', to: 'src/core/language.ts::class::Language::method::extract', kind: 'defines', resolved: true },
-    { from: 'src/core/language.ts::class::Language', to: 'src/core/language.ts::class::Language::method::parse', kind: 'defines', resolved: true },
-    { from: 'src/core/graph/graph.ts', to: 'src/core/graph/graph.ts::class::Graph', kind: 'defines', resolved: true },
-    { from: 'src/core/graph/graph.ts::class::Graph', to: 'src/core/graph/graph.ts::class::Graph::method::addNode', kind: 'defines', resolved: true },
-    { from: 'src/core/graph/graph.ts::class::Graph', to: 'src/core/graph/graph.ts::class::Graph::method::addEdge', kind: 'defines', resolved: true },
-    { from: 'src/core/graph/graph.ts::class::Graph', to: 'src/core/graph/graph.ts::class::Graph::method::serialize', kind: 'defines', resolved: true },
-    { from: 'src/models/global.ts', to: 'src/models/global.ts::type::Node', kind: 'defines', resolved: true },
-    { from: 'src/models/global.ts', to: 'src/models/global.ts::type::Edge', kind: 'defines', resolved: true },
-    { from: 'src/utils/factory.ts', to: 'src/utils/factory.ts::function::createCapture', kind: 'defines', resolved: true },
-    { from: 'packages/typescript/src/capture.ts', to: 'packages/typescript/src/capture.ts::variable::capture', kind: 'defines', resolved: true },
-    { from: 'packages/typescript/src/convert/convert.ts', to: 'packages/typescript/src/convert/convert.ts::function::convert', kind: 'defines', resolved: true },
-    { from: 'src/core/parser.ts', to: 'src/core/language.ts::class::Language', kind: 'imports', resolved: true },
-    { from: 'src/core/parser.ts', to: 'src/models/global.ts::type::Node', kind: 'imports', resolved: true },
-    { from: 'src/core/parser.ts', to: 'src/models/global.ts::type::Edge', kind: 'imports', resolved: true },
-    { from: 'src/core/language.ts', to: 'src/models/global.ts::type::Node', kind: 'imports', resolved: true },
-    { from: 'src/core/language.ts', to: 'src/models/global.ts::type::Edge', kind: 'imports', resolved: true },
-    { from: 'src/core/graph/graph.ts', to: 'src/models/global.ts::type::Node', kind: 'imports', resolved: true },
-    { from: 'src/core/graph/graph.ts', to: 'src/models/global.ts::type::Edge', kind: 'imports', resolved: true },
-    { from: 'packages/typescript/src/capture.ts', to: 'src/utils/factory.ts::function::createCapture', kind: 'imports', resolved: true },
+    { from: 'src/core/parser.ts', to: 'src/core/parser.ts|class|Parser', kind: 'defines', resolved: true },
+    { from: 'src/core/parser.ts|class|Parser', to: 'src/core/parser.ts|class|Parser|method|parse', kind: 'defines', resolved: true },
+    { from: 'src/core/language.ts', to: 'src/core/language.ts|class|Language', kind: 'defines', resolved: true },
+    { from: 'src/core/language.ts|class|Language', to: 'src/core/language.ts|class|Language|method|extract', kind: 'defines', resolved: true },
+    { from: 'src/core/language.ts|class|Language', to: 'src/core/language.ts|class|Language|method|parse', kind: 'defines', resolved: true },
+    { from: 'src/core/graph/graph.ts', to: 'src/core/graph/graph.ts|class|Graph', kind: 'defines', resolved: true },
+    { from: 'src/core/graph/graph.ts|class|Graph', to: 'src/core/graph/graph.ts|class|Graph|method|addNode', kind: 'defines', resolved: true },
+    { from: 'src/core/graph/graph.ts|class|Graph', to: 'src/core/graph/graph.ts|class|Graph|method|addEdge', kind: 'defines', resolved: true },
+    { from: 'src/core/graph/graph.ts|class|Graph', to: 'src/core/graph/graph.ts|class|Graph|method|serialize', kind: 'defines', resolved: true },
+    { from: 'src/models/global.ts', to: 'src/models/global.ts|type|Node', kind: 'defines', resolved: true },
+    { from: 'src/models/global.ts', to: 'src/models/global.ts|type|Edge', kind: 'defines', resolved: true },
+    { from: 'src/utils/factory.ts', to: 'src/utils/factory.ts|function|createCapture', kind: 'defines', resolved: true },
+    { from: 'packages/typescript/src/capture.ts', to: 'packages/typescript/src/capture.ts|variable|capture', kind: 'defines', resolved: true },
+    { from: 'packages/typescript/src/convert/convert.ts', to: 'packages/typescript/src/convert/convert.ts|function|convert', kind: 'defines', resolved: true },
+    { from: 'src/core/parser.ts', to: 'src/core/language.ts|class|Language', kind: 'imports', resolved: true },
+    { from: 'src/core/parser.ts', to: 'src/models/global.ts|type|Node', kind: 'imports', resolved: true },
+    { from: 'src/core/parser.ts', to: 'src/models/global.ts|type|Edge', kind: 'imports', resolved: true },
+    { from: 'src/core/language.ts', to: 'src/models/global.ts|type|Node', kind: 'imports', resolved: true },
+    { from: 'src/core/language.ts', to: 'src/models/global.ts|type|Edge', kind: 'imports', resolved: true },
+    { from: 'src/core/graph/graph.ts', to: 'src/models/global.ts|type|Node', kind: 'imports', resolved: true },
+    { from: 'src/core/graph/graph.ts', to: 'src/models/global.ts|type|Edge', kind: 'imports', resolved: true },
+    { from: 'packages/typescript/src/capture.ts', to: 'src/utils/factory.ts|function|createCapture', kind: 'imports', resolved: true },
     { from: 'src/core/parser.ts', to: 'tree-sitter', kind: 'imports', resolved: true },
     { from: 'src/core/language.ts', to: 'tree-sitter', kind: 'imports', resolved: true },
     { from: 'packages/typescript/src/convert/convert.ts', to: 'semdex', kind: 'imports', resolved: true },
@@ -530,7 +530,7 @@ const SAMPLE_DATA = {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 function shortLabel(id) {
-  const parts = id.split('::');
+  const parts = id.split('|');
   return parts[parts.length - 1];
 }
 
@@ -544,7 +544,7 @@ function nodeRadius(kind) {
 }
 
 // Returns the top-level file/module segment of a node ID.
-function nodeFile(id) { return id.split('::')[0]; }
+function nodeFile(id) { return id.split('|')[0]; }
 
 // Hull geometry ──────────────────────────────────────────────────────────────
 const HULL_PAD = 22;

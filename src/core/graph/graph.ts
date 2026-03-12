@@ -1,8 +1,8 @@
+import { SEPARATOR } from "@/consts";
 import type { Edge, Node } from "@/models";
 import { defined } from "@/shared/defined";
 
 import { GraphError } from "./error";
-import { resolve, type ResolvedEdge } from "./resolve";
 
 class Graph<N extends Node = Node, E extends Edge = Edge> {
   private _nodes: Map<Node["id"], N>;
@@ -28,7 +28,7 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
 
     // resolve edges by walking through pre-resolved edges
     for (const edge of edges.filter((e) => e.resolved !== true)) {
-      this.addEdge(resolve(this, edge));
+      this.addEdge(Graph.resolve(this, edge));
     }
   }
 
@@ -162,9 +162,9 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
     this._edgeProps.clear();
   }
 
-  serialize(): { nodes: N[]; edges: ResolvedEdge<E>[] } {
+  serialize(): { nodes: N[]; edges: Graph.ResolvedEdge<E>[] } {
     const nodes = Array.from(this._nodes.values());
-    const edges: ResolvedEdge<E>[] = [];
+    const edges: Graph.ResolvedEdge<E>[] = [];
 
     for (const [from, toMap] of this._edges) {
       for (const [to, kinds] of toMap) {
@@ -176,7 +176,7 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
             kind,
             resolved: true,
             ...(props !== undefined && { props }),
-          } as ResolvedEdge<E>);
+          } as Graph.ResolvedEdge<E>);
         }
       }
     }
@@ -220,11 +220,87 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
     return this;
   }
 
-  private _assertResolved(edge: E): asserts edge is ResolvedEdge<E> {
+  private _assertResolved(edge: E): asserts edge is Graph.ResolvedEdge<E> {
     if (!edge.resolved) {
       throw new GraphError(
         "GRAPH_UNRESOLVED_EDGE",
         `Unresolved edge target: ${edge.to}`,
+      );
+    }
+  }
+}
+
+namespace Graph {
+  export type ResolvedEdge<E extends Edge> = E & {
+    to: Node["id"];
+    resolved: true;
+  };
+
+  function isEdge(item: any): item is Edge {
+    return (
+      "from" in item &&
+      "to" in item &&
+      "kind" in item &&
+      "resolved" in item &&
+      typeof item.resolved === "boolean"
+    );
+  }
+
+  function parent(id: Node["id"]): Node["id"] | undefined {
+    const i = id.lastIndexOf(SEPARATOR);
+    return i > 0 ? id.slice(0, i) : undefined;
+  }
+
+  /**
+   *
+   */
+  export function resolve<N extends Node = Node, E extends Edge = Edge>(
+    graph: Graph<N, E>,
+    edge: E,
+  ): ResolvedEdge<E>;
+  /**
+   *
+   */
+  export function resolve<N extends Node = Node, E extends Edge = Edge>(
+    graph: Graph<N, E>,
+    name: string,
+    from: Node["id"],
+  ): Node["id"];
+  export function resolve<N extends Node = Node, E extends Edge = Edge>(
+    graph: Graph<N, E>,
+    item: E | string,
+    from?: Node["id"],
+  ): ResolvedEdge<E> | Node["id"] {
+    if (isEdge(item)) {
+      // item is Edge
+      if (item.resolved) return item as ResolvedEdge<E>;
+
+      return {
+        ...item,
+        to: resolve(graph, item.to, item.from),
+        resolved: true,
+      } satisfies ResolvedEdge<E>;
+    } else {
+      // resolve id by name
+      const name = item;
+      let scope = from; // start from caller
+
+      while (scope !== undefined) {
+        const adj = graph.adjacent(scope);
+        if (adj) {
+          for (const [targetId] of adj) {
+            if (targetId.endsWith(SEPARATOR + name)) {
+              return targetId;
+            }
+          }
+        }
+
+        scope = parent(scope);
+      }
+
+      throw new GraphError(
+        "GRAPH_EDGE_RESOLUTION_FAILED",
+        `Failed to resolve ${item} from ${from}`,
       );
     }
   }

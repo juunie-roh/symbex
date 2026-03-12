@@ -1,4 +1,5 @@
 import { Graph } from "./graph";
+import { Language } from "./language";
 import { Parser } from "./parser";
 
-export { Graph, Parser };
+export { Graph, Language, Parser };

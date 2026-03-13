@@ -1,3 +1,3 @@
-const SEPARATOR: "|" = "|";
+const SEPARATOR: "::" = "::";
 
 export { SEPARATOR };

@@ -2,11 +2,13 @@ import type TSParser from "tree-sitter";
 
 import type { QueryConfig } from "./global";
 
+type CaptureConfigOptions = {
+  bypass?: (node: TSParser.SyntaxNode) => TSParser.QueryMatch[];
+  maxStartDepth?: number;
+};
+
 type CaptureConfig<Q extends QueryConfig> = {
-  [K in keyof Q]?: {
-    typesToInclude?: string | string[];
-    maxStartDepth?: number;
-  };
+  [K in keyof Q]?: CaptureConfigOptions;
 };
 
 type SingleCaptureResult<T extends QueryConfig[string]> = {
@@ -19,4 +21,9 @@ type FullCaptureResult<Q extends QueryConfig> = {
   [K in keyof Q]: SingleCaptureResult<Q[K]>[];
 };
 
-export type { CaptureConfig, FullCaptureResult, SingleCaptureResult };
+export type {
+  CaptureConfig,
+  CaptureConfigOptions,
+  FullCaptureResult,
+  SingleCaptureResult,
+};

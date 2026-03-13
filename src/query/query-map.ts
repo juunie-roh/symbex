@@ -1,5 +1,7 @@
 import TSParser from "tree-sitter";
 
+import type { CaptureConfigOptions } from "@/models/capture";
+
 import { QueryError } from "./error";
 
 class QueryMap<K extends string> extends Map<K, TSParser.Query> {
@@ -41,8 +43,7 @@ class QueryMap<K extends string> extends Map<K, TSParser.Query> {
   match(
     key: K,
     node: TSParser.SyntaxNode,
-    typesToInclude?: string | string[],
-    maxStartDepth = 1,
+    { bypass, maxStartDepth = 1 }: CaptureConfigOptions,
   ): TSParser.QueryMatch[] {
     const matches = this.get(key).matches(node, {
       startIndex: node.startIndex,
@@ -50,17 +51,9 @@ class QueryMap<K extends string> extends Map<K, TSParser.Query> {
       maxStartDepth,
     });
 
-    if (!typesToInclude) return matches;
-
-    const set = new Set(
-      Array.isArray(typesToInclude) ? typesToInclude : [typesToInclude],
-    );
-
-    matches.push(
-      ...node.namedChildren
-        .filter((child) => set.has(child.type))
-        .flatMap((child) => this.match(key, child)),
-    );
+    if (bypass) {
+      matches.push(...bypass(node));
+    }
 
     return matches;
   }

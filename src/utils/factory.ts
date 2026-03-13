@@ -96,12 +96,10 @@ function createCapture<Q extends QueryConfig>(
     }
 
     return query
-      .match(
-        tag as keyof Q & string,
-        node,
-        config[tag]?.typesToInclude,
-        config[tag]?.maxStartDepth,
-      )
+      .match(tag as keyof Q & string, node, {
+        bypass: config[tag]?.bypass,
+        maxStartDepth: config[tag]?.maxStartDepth,
+      })
       .map(toCapture);
   }
 

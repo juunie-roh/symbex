@@ -810,7 +810,7 @@ function render(rawData) {
       ttId.textContent   = d.id;
       ttKind.textContent = `kind: ${d.kind}`;
       ttRange.textContent = d.range
-        ? `lines ${d.range.startPosition?.row ?? '?'}–${d.range.endPosition?.row ?? '?'}`
+        ? `lines ${d.range.line ?? "?"}`
         : '';
       tooltip.style.visibility = 'visible';
     })

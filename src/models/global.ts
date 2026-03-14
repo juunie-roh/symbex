@@ -7,7 +7,7 @@ import type TSParser from "tree-sitter";
  * import type * as symbex from "symbex";
  * type Node = symbex.Node<"node kind" | "string literals">;
  */
-interface Node<K extends string = string> {
+export interface Node<K extends string = string> {
   /**
    * Unique human-readable id identifying the node.
    */
@@ -16,6 +16,7 @@ interface Node<K extends string = string> {
    * Kind of this node.
    */
   kind: K;
+  type: "scope" | "binding";
   /**
    * A range of positions in a multi-line text document, specified both in terms of byte offsets and row/column positions.
    * @see {@link TSParser.Range | tree-sitter `Range`}
@@ -34,7 +35,7 @@ interface Node<K extends string = string> {
  * import type * as symbex from "symbex";
  * type Edge = symbex.Edge<"edge kind" | "string literals">;
  */
-interface Edge<K extends string = string> {
+export interface Edge<K extends string = string> {
   /**
    * ID of the source node where the relationship originates.
    */
@@ -57,11 +58,9 @@ interface Edge<K extends string = string> {
   props?: Record<string, unknown>;
 }
 
-type QueryTag = {
+export type QueryTag = {
   required: string;
   optional: string;
 };
 
-type QueryConfig = Record<string, QueryTag>;
-
-export type { Edge, Node, QueryConfig, QueryTag };
+export type QueryConfig = Record<string, QueryTag>;

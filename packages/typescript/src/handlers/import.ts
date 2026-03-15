@@ -1,3 +1,4 @@
+import type { NodeSignature } from "symbex";
 import { createConvertResult, createSignature } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
@@ -40,12 +41,12 @@ const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
   sources.forEach((source) => {
     result.edges.push({
       from: parentId,
-      to: source,
+      to: source as NodeSignature,
       kind: "imports",
     });
 
     result.nodes.push({
-      signature: source,
+      signature: source as NodeSignature,
       type: "scope",
       kind: "module",
     });

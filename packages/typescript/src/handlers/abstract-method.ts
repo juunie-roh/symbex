@@ -1,4 +1,4 @@
-import { createCanonicalId, createConvertResult, getRange } from "symbex/utils";
+import { createConvertResult, createSignature, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -10,15 +10,14 @@ const abstractMethodHandler: ConvertHandler<"abstract_method"> = (
 
   for (const c of captures) {
     const { name, node, modifier, type_params, params, return_type } = c;
-    const id = createCanonicalId(parentId, name.text);
+    const sign = createSignature(parentId, name.text);
     result.edges.push({
       from: parentId,
-      to: id,
+      to: sign,
       kind: "defines",
-      resolved: true,
     });
     result.nodes.push({
-      id,
+      signature: sign,
       type: "binding",
       kind: "abstract_method",
       range: getRange(node),

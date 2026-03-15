@@ -1,4 +1,4 @@
-import { createCanonicalId, createConvertResult, getRange } from "symbex/utils";
+import { createConvertResult, createSignature, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -18,15 +18,14 @@ const patternHandler: ConvertHandler<"pattern"> = (
           );
         break;
       case "identifier":
-        const id = createCanonicalId(parentId, c.node.text);
+        const sign = createSignature(parentId, c.node.text);
         result.edges.push({
           from: parentId,
-          to: id,
+          to: sign,
           kind: "defines",
-          resolved: true,
         });
         result.nodes.push({
-          id,
+          signature: sign,
           type: "binding",
           kind: "variable",
           range: getRange(c.node),
@@ -38,15 +37,14 @@ const patternHandler: ConvertHandler<"pattern"> = (
         break;
       case "object_pattern":
         if (c.name) {
-          const id = createCanonicalId(parentId, c.node.text);
+          const sign = createSignature(parentId, c.node.text);
           result.edges.push({
             from: parentId,
-            to: id,
+            to: sign,
             kind: "defines",
-            resolved: true,
           });
           result.nodes.push({
-            id,
+            signature: sign,
             type: "binding",
             kind: "variable",
             range: getRange(c.node),

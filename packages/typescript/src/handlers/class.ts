@@ -1,4 +1,4 @@
-import { createCanonicalId, createConvertResult, getRange } from "symbex/utils";
+import { createConvertResult, createSignature, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -11,15 +11,14 @@ const classHandler: ConvertHandler<"class"> = (
 
   for (const c of captures) {
     const { name, node, type_params, extends: ext, implements: impl, body } = c;
-    const id = createCanonicalId(parentId, name.text);
+    const sign = createSignature(parentId, name.text);
     result.edges.push({
       from: parentId,
-      to: id,
+      to: sign,
       kind: "defines",
-      resolved: true,
     });
     result.nodes.push({
-      id,
+      signature: sign,
       type: "scope",
       kind: "class",
       range: getRange(node),
@@ -31,8 +30,8 @@ const classHandler: ConvertHandler<"class"> = (
     });
 
     if (body) {
-      result.push(convert(capture(body, "method"), id, "method"));
-      result.push(convert(capture(body, "member"), id, "member"));
+      result.push(convert(capture(body, "method"), sign, "method"));
+      result.push(convert(capture(body, "member"), sign, "member"));
     }
   }
 

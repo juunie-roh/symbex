@@ -1,4 +1,4 @@
-import { createCanonicalId, createConvertResult, getRange } from "symbex/utils";
+import { createConvertResult, createSignature, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -21,7 +21,7 @@ const variableHandler: ConvertHandler<"variable"> = (
     const declarator = node.namedChildren.find(
       (c) => c.type === "variable_declarator",
     );
-
+    // exclude value node types:
     if (
       declarator?.childForFieldName("value")?.type &&
       excludes.has(declarator.childForFieldName("value")!.type)
@@ -30,15 +30,14 @@ const variableHandler: ConvertHandler<"variable"> = (
     }
 
     if (name) {
-      const id = createCanonicalId(parentId, name.text);
+      const sign = createSignature(parentId, name.text);
       result.edges.push({
         from: parentId,
-        to: id,
+        to: sign,
         kind: "defines",
-        resolved: true,
       });
       result.nodes.push({
-        id,
+        signature: sign,
         type: "binding",
         kind: "variable",
         range: getRange(node),

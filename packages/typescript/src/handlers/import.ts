@@ -1,4 +1,4 @@
-import { createCanonicalId, createConvertResult } from "symbex/utils";
+import { createConvertResult, createSignature } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -16,15 +16,14 @@ const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
     const isType = is_type ? true : false;
 
     if (representative) {
-      const id = createCanonicalId(parentId, representative);
+      const sign = createSignature(parentId, representative);
       result.edges.push({
         from: parentId,
-        to: id,
+        to: sign,
         kind: "defines",
-        resolved: true,
       });
       result.nodes.push({
-        id,
+        signature: sign,
         type: "binding",
         kind: isType ? "type" : "variable",
         props: alias
@@ -43,11 +42,10 @@ const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
       from: parentId,
       to: source,
       kind: "imports",
-      resolved: true,
     });
 
     result.nodes.push({
-      id: source,
+      signature: source,
       type: "scope",
       kind: "module",
     });

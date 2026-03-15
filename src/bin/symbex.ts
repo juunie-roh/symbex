@@ -28,7 +28,7 @@ program
     const parser = new Parser(config);
     const { nodes, edges } = parser.parse(file, readFileSync(file, "utf-8"));
     // add root file node once
-    nodes.push({ signature: file, kind: "file", type: "scope" });
+    nodes.push({ signature: file, kind: "module", type: "scope" });
 
     const graph = new Graph(nodes, edges);
 

@@ -1,4 +1,4 @@
-import type { Edge, Node, NodeId } from "@/models";
+import type { Edge, Node, NodeId, NodePath } from "@/models";
 import { defined } from "@/shared/defined";
 
 import GraphError from "./error";
@@ -239,33 +239,42 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
     return this;
   }
 
-  // private _parent(id: NodeId): NodeId | undefined {
-  //   const i = this._registry.decode(id);
-  //   return i > 0 ? (id.slice(0, i) as any) : undefined;
-  // }
+  private _parent(id: NodeId): NodeId | undefined {
+    const path = this._registry.decode(id);
+    const parentPath = path.slice(0, -1) as NodePath;
 
-  // private _resolve(name: string, from: NodeId): any {
-  //   // resolve id by name
-  //   let scope: NodeId | undefined = from; // start from caller
+    if (!this._registry.has(parentPath)) return;
 
-  //   while (scope !== undefined) {
-  //     const adj = this.adjacent(scope);
-  //     if (adj) {
-  //       for (const [targetId] of adj) {
-  //         if (targetId.endsWith(SEPARATOR + name)) {
-  //           return targetId;
-  //         }
-  //       }
-  //     }
+    return this._registry.encode(parentPath);
+  }
 
-  //     scope = this._parent(scope);
-  //   }
+  private _resolve(name: string, from: NodeId): NodeId {
+    // resolve id by name
+    let scope: NodeId | undefined = from;
+    // bread-first-search with adjacent nodes
+    while (scope !== undefined) {
+      const adj = this.adjacent(scope);
+      if (adj) {
+        for (const [id] of adj) {
+          const path = this._registry.decode(id);
+          // get identifier (last element of path array)
+          const identifier = path[path.length - 1];
+          if (identifier === name) {
+            return id;
+          }
+        }
+      }
+      // continue search on parent
+      scope = this._parent(scope);
+    }
 
-  //   throw new GraphError(
-  //     "GRAPH_NAME_RESOLUTION_FAILED",
-  //     `Failed to resolve ${name} from ${from}`,
-  //   );
-  // }
+    // TODO: Global resolution
+
+    throw new GraphError(
+      "GRAPH_NAME_RESOLUTION_FAILED",
+      `Failed to resolve ${name} from ${from}`,
+    );
+  }
 }
 
 export default Graph;

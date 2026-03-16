@@ -1,9 +1,9 @@
-import type { NodeSignature } from "symbex";
-import { createConvertResult, createSignature } from "symbex/utils";
+import type { NodePath } from "symbex";
+import { createChildPath, createConvertResult } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
+const importHandler: ConvertHandler<"import"> = (captures, parent) => {
   const result = createConvertResult<Node, Edge>();
   const sources = new Set<string>();
 
@@ -17,14 +17,14 @@ const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
     const isType = is_type ? true : false;
 
     if (representative) {
-      const sign = createSignature(parentId, representative);
+      const path = createChildPath(parent, representative);
       result.edges.push({
-        from: parentId,
-        to: sign,
+        from: parent,
+        to: path,
         kind: "defines",
       });
       result.nodes.push({
-        signature: sign,
+        path,
         type: "binding",
         kind: isType ? "type" : "variable",
         props: alias
@@ -40,13 +40,13 @@ const importHandler: ConvertHandler<"import"> = (captures, parentId) => {
 
   sources.forEach((source) => {
     result.edges.push({
-      from: parentId,
-      to: source as NodeSignature,
+      from: parent,
+      to: [source] as NodePath,
       kind: "imports",
     });
 
     result.nodes.push({
-      signature: source as NodeSignature,
+      path: [source] as NodePath,
       type: "scope",
       kind: "module",
     });

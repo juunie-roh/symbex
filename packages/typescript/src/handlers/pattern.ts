@@ -1,10 +1,10 @@
-import { createConvertResult, createSignature, getRange } from "symbex/utils";
+import { createChildPath, createConvertResult, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
 const patternHandler: ConvertHandler<"pattern"> = (
   captures,
-  parentId,
+  parent,
   { capture, convert },
 ) => {
   const result = createConvertResult<Node, Edge>();
@@ -14,18 +14,18 @@ const patternHandler: ConvertHandler<"pattern"> = (
       case "array_pattern":
         if (c.pattern)
           result.push(
-            convert(capture(c.pattern, "pattern"), parentId, "pattern"),
+            convert(capture(c.pattern, "pattern"), parent, "pattern"),
           );
         break;
       case "identifier":
-        const sign = createSignature(parentId, c.node.text);
+        const path = createChildPath(parent, c.node.text);
         result.edges.push({
-          from: parentId,
-          to: sign,
+          from: parent,
+          to: path,
           kind: "defines",
         });
         result.nodes.push({
-          signature: sign,
+          path,
           type: "binding",
           kind: "variable",
           range: getRange(c.node),
@@ -37,14 +37,14 @@ const patternHandler: ConvertHandler<"pattern"> = (
         break;
       case "object_pattern":
         if (c.name) {
-          const sign = createSignature(parentId, c.node.text);
+          const path = createChildPath(parent, c.node.text);
           result.edges.push({
-            from: parentId,
-            to: sign,
+            from: parent,
+            to: path,
             kind: "defines",
           });
           result.nodes.push({
-            signature: sign,
+            path,
             type: "binding",
             kind: "variable",
             range: getRange(c.node),
@@ -52,14 +52,12 @@ const patternHandler: ConvertHandler<"pattern"> = (
         }
         if (c.pattern) {
           result.push(
-            convert(capture(c.pattern, "pattern"), parentId, "pattern"),
+            convert(capture(c.pattern, "pattern"), parent, "pattern"),
           );
         }
         break;
       case "rest_pattern":
-        result.push(
-          convert(capture(c.pattern!, "pattern"), parentId, "pattern"),
-        );
+        result.push(convert(capture(c.pattern!, "pattern"), parent, "pattern"));
         break;
     }
   }

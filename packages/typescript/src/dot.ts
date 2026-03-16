@@ -1,4 +1,4 @@
-import type { NodeSignature } from "symbex";
+import type { NodeId } from "symbex";
 
 import { Graph } from "@/types";
 
@@ -13,21 +13,21 @@ function toDot(graph: Graph, name = "symbex"): string {
   ];
 
   // Build a scope tree from all node IDs split by "::"
-  const scopeChildren = new Map<NodeSignature, Set<NodeSignature>>();
-  scopeChildren.set("" as NodeSignature, new Set());
+  const scopeChildren = new Map<NodeId, Set<NodeId>>();
+  scopeChildren.set("" as NodeId, new Set());
 
   for (const id of graph.nodes.keys()) {
     const parts = id.split("::");
     for (let i = 1; i <= parts.length; i++) {
-      const scope = parts.slice(0, i).join("::") as NodeSignature;
-      const parent = parts.slice(0, i - 1).join("::") as NodeSignature;
+      const scope = parts.slice(0, i).join("::") as NodeId;
+      const parent = parts.slice(0, i - 1).join("::") as NodeId;
       if (!scopeChildren.has(parent)) scopeChildren.set(parent, new Set());
       scopeChildren.get(parent)!.add(scope);
       if (!scopeChildren.has(scope)) scopeChildren.set(scope, new Set());
     }
   }
 
-  const renderScope = (scope: NodeSignature, indent: string): void => {
+  const renderScope = (scope: NodeId, indent: string): void => {
     for (const child of scopeChildren.get(scope) ?? []) {
       const childChildren = scopeChildren.get(child);
       const hasChildren = (childChildren?.size ?? 0) > 0;
@@ -60,7 +60,7 @@ function toDot(graph: Graph, name = "symbex"): string {
     }
   };
 
-  renderScope("" as NodeSignature, "  ");
+  renderScope("" as NodeId, "  ");
 
   const moduleIds = [...graph.nodes.entries()]
     .filter(([, node]) => node.kind === "module")

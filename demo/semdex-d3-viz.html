@@ -797,7 +797,7 @@ function render(rawData) {
   node.append('text')
     .style('display', showLabels ? null : 'none')
     .attr('dy', d => nodeRadius(d.kind) + 10)
-    .text(d => shortLabel(d.id));
+    .text(d => d.name);
 
   // ── Interactions ─────────────────────────────────────────────────
   const tooltip = document.getElementById('tooltip');
@@ -807,7 +807,7 @@ function render(rawData) {
 
   node
     .on('mouseover', (event, d) => {
-      ttId.textContent   = d.id;
+      ttId.textContent   = d.name;
       ttKind.textContent = `kind: ${d.kind}`;
       ttRange.textContent = d.range
         ? `lines ${d.range.line ?? "?"}`
@@ -874,21 +874,21 @@ function _buildLegend(nodeKinds, edgeKinds) {
 }
 
 function _showInfoPanel(d, simLinks, incomingMap) {
-  document.getElementById('info-id').textContent   = d.id;
+  document.getElementById('info-id').textContent   = d.name;
   document.getElementById('info-kind').textContent = `kind: ${d.kind}`;
 
   const outList = document.getElementById('info-out-list');
   outList.innerHTML = '';
   simLinks.filter(e => e.source.id === d.id).forEach(e => {
     outList.insertAdjacentHTML('beforeend',
-      `<div class="info-edge">${e.kind} → ${e.target.id}</div>`);
+      `<div class="info-edge">${e.kind} → ${e.target.name}</div>`);
   });
 
   const inList = document.getElementById('info-in-list');
   inList.innerHTML = '';
   (incomingMap.get(d.id) ?? []).forEach(e => {
     inList.insertAdjacentHTML('beforeend',
-      `<div class="info-edge incoming">${e.kind} ← ${e.from}</div>`);
+      `<div class="info-edge incoming">${e.kind} ← ${e.fromName}</div>`);
   });
 
   document.getElementById('info-panel').style.display = 'block';

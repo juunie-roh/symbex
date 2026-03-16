@@ -1,10 +1,10 @@
-import { createConvertResult, createSignature, getRange } from "symbex/utils";
+import { createChildPath, createConvertResult, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
 const variableHandler: ConvertHandler<"variable"> = (
   captures,
-  parentId,
+  parent,
   { capture, convert },
 ) => {
   const result = createConvertResult<Node, Edge>();
@@ -30,14 +30,14 @@ const variableHandler: ConvertHandler<"variable"> = (
     }
 
     if (name) {
-      const sign = createSignature(parentId, name.text);
+      const path = createChildPath(parent, name.text);
       result.edges.push({
-        from: parentId,
-        to: sign,
+        from: parent,
+        to: path,
         kind: "defines",
       });
       result.nodes.push({
-        signature: sign,
+        path,
         type: "binding",
         kind: "variable",
         range: getRange(node),
@@ -47,7 +47,7 @@ const variableHandler: ConvertHandler<"variable"> = (
         },
       });
     } else if (pattern) {
-      result.push(convert(capture(pattern, "pattern"), parentId, "pattern"));
+      result.push(convert(capture(pattern, "pattern"), parent, "pattern"));
     }
   }
 

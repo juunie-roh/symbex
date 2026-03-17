@@ -30,12 +30,10 @@
   },
   "peerDependencies": {
     "symbex": "^0.0.1",
-    "tree-sitter-javascript": "^0.25.0",
     "tree-sitter-typescript": "^0.23.2"
   },
   "devDependencies": {
     "symbex": "workspace:*",
-    "tree-sitter-javascript": "^0.25.0",
     "tree-sitter-typescript": "^0.23.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"

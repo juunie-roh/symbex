@@ -89,15 +89,6 @@ class GraphCursor {
       return path[path.length - 1] === symbol;
     });
   }
-
-  // move(to: NodeId): this {
-  //   this._id = to;
-  //   return this;
-  // }
-
-  // fork(): GraphCursor {
-  //   return new GraphCursor(this._graph, this._id);
-  // }
 }
 
 export default GraphCursor;

@@ -31,7 +31,7 @@ const originalLoad = CjsModule._load.bind(CjsModule);
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_PLUGIN = "@symbex/typescript";
+const VALID_PLUGIN = "@symbex/javascript";
 
 const validLangShape = {
   name: "typescript",

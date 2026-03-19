@@ -205,10 +205,16 @@ class Graph<N extends Node = Node, E extends Edge = Edge> {
       this._nodes.values().map((n) => ({
         ...n,
         path: this.path(n.id),
-        range: {
-          byte: `${n.range?.startIndex}:${n.range?.endIndex}`,
-          line: `L${n.range?.startPosition.row}:L${n.range?.endPosition.row}`,
-        },
+        at:
+          "name" in n.at
+            ? {
+                name: n.at.name,
+                external: n.at.external ?? false,
+              }
+            : {
+                byte: `${n.at.startIndex}:${n.at.endIndex}`,
+                line: `L${n.at.startPosition.row}:L${n.at.endPosition.row}`,
+              },
       })),
     );
     const edges = [];

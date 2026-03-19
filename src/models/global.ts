@@ -16,6 +16,8 @@ export type NodeId = Branded<string, "NODE_ID">;
 export type NodePath = Branded<string[], "NODE_PATH">;
 export type NodePathString = Branded<string, "NODE_PATH_STRING">;
 
+export type NodeSource = { name: string; external?: boolean };
+
 /**
  * @template K - String union of valid `kind` values for this node. Defaults to
  * `string` for untyped use; narrow it to a literal union to get type-safe `kind` access.
@@ -37,10 +39,10 @@ export interface Node<K extends string = string> {
    */
   type: "scope" | "anonymous" | "binding";
   /**
-   * A range of positions in a multi-line text document, specified both in terms of byte offsets and row/column positions.
+   * A position where does the node sit in the file. If the node is from outside the file, {@link NodeSource | source}.
    * @see {@link TSParser.Range | tree-sitter `Range`}
    */
-  range?: TSParser.Range;
+  at: TSParser.Range | NodeSource;
   /**
    * Language-specific property supplements.
    */

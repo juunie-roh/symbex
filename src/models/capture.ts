@@ -12,9 +12,9 @@ type CaptureConfig<Q extends QueryConfig> = {
 };
 
 type SingleCaptureResult<T extends QueryConfig[string]> = {
-  [K in T["required"][number]]: TSParser.SyntaxNode;
+  [K in T["required"]]: TSParser.SyntaxNode;
 } & {
-  [K in T["optional"][number]]?: TSParser.SyntaxNode;
+  [K in T["optional"]]?: TSParser.SyntaxNode;
 };
 
 type FullCaptureResult<Q extends QueryConfig> = {

@@ -81,8 +81,9 @@ class LanguagePlugin {
     // add root file node once
     result.nodes.push({
       path: [filePath] as NodePath,
-      kind: "module",
+      kind: "file",
       type: "scope",
+      at: { name: filePath },
     });
 
     return result;

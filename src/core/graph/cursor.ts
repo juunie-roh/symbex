@@ -20,7 +20,8 @@ class GraphCursor {
     let deepestDepth = -1;
 
     for (const [id, node] of graph.nodes) {
-      const { startIndex, endIndex } = node.range ?? {};
+      if ("name" in node.at) continue;
+      const { startIndex, endIndex } = node.at ?? {};
       if (startIndex === undefined || endIndex === undefined) continue;
       if (offset < startIndex || offset > endIndex) continue;
 

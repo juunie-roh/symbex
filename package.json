@@ -59,7 +59,7 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "ts": "pnpm --filter @symbex/javascript"
+    "js": "pnpm --filter @symbex/javascript"
   },
   "dependencies": {
     "commander": "^14.0.3",

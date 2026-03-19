@@ -1,13 +1,9 @@
 import type * as symbex from "symbex";
 
 export type QueryConfig = {
-  class: {
-    required: "node" | "name" | "body";
-    optional: "extends" | "decorator";
-  };
-  function: {
-    required: "node" | "name" | "params" | "body";
-    optional: "is_async";
+  iife: {
+    required: "node" | "body";
+    optional: never;
   };
   import: {
     required: "node" | "source";
@@ -17,17 +13,29 @@ export type QueryConfig = {
     required: "node" | "name";
     optional: "is_static" | "decorator";
   };
+  variable: {
+    required: "node" | "pattern" | "kind";
+    optional: "name";
+  };
+  class: {
+    required: "node" | "name" | "body";
+    optional: "extends" | "decorator";
+  };
+  function: {
+    required: "node" | "name" | "params" | "body";
+    optional: "is_async";
+  };
   method: {
     required: "node" | "name" | "body" | "params";
     optional: "is_static" | "is_async" | "decorator";
   };
+  parameter: {
+    required: never;
+    optional: "pattern" | "name" | "default" | "key";
+  };
   pattern: {
     required: "node";
     optional: "pattern" | "name" | "default" | "key";
-  };
-  variable: {
-    required: "node" | "pattern" | "kind";
-    optional: "name";
   };
 };
 
@@ -37,7 +45,7 @@ export type NodeKind = keyof QueryConfig;
 
 export type Node = symbex.Node<NodeKind>;
 
-export type EdgeKind = "defines" | "extends" | "imports";
+export type EdgeKind = "defines" | "extends" | "imports" | "contains";
 
 export type Edge = symbex.Edge<EdgeKind>;
 

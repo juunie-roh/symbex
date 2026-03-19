@@ -32,6 +32,7 @@ const functionHandler: ConvertHandler<"function"> = (
     }
 
     if (params) {
+      result.push(convert(capture(params, "parameter"), path, "parameter"));
     }
   }
 

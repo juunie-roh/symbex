@@ -26,17 +26,14 @@ const methodHandler: ConvertHandler<"method"> = (
         name: name.text,
         is_static: is_static ? true : false,
         is_async: is_async ? true : false,
-        params: params?.text,
         decorator: decorator?.text,
       },
     });
 
+    result.push(convert(capture(params, "parameter"), path, "parameter"));
+
     if (body) {
       result.push(convert(capture(body), path));
-    }
-
-    if (params) {
-      result.push(convert(capture(params, "parameter"), path, "parameter"));
     }
   }
   return result;

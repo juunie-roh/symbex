@@ -27,12 +27,10 @@ const functionHandler: ConvertHandler<"function"> = (
       props: { is_async: !!is_async },
     });
 
+    result.push(convert(capture(params, "parameter"), path, "parameter"));
+
     if (body) {
       result.push(convert(capture(body), path));
-    }
-
-    if (params) {
-      result.push(convert(capture(params, "parameter"), path, "parameter"));
     }
   }
 

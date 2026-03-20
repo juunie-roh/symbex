@@ -2,6 +2,8 @@ import { createChildPath, createConvertResult, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
+import { getDecorators } from "../utility/decorator";
+
 const classHandler: ConvertHandler<"class"> = (
   captures,
   parent,
@@ -12,6 +14,12 @@ const classHandler: ConvertHandler<"class"> = (
   for (const c of captures) {
     const { name, node, decorator, extends: ext, body } = c;
     const path = createChildPath(parent, name.text);
+    const decorators = decorator
+      ? getDecorators(decorator)
+          .map((d) => d.text)
+          .join(", ")
+      : undefined;
+
     result.edges.push({
       from: parent,
       to: path,
@@ -24,7 +32,7 @@ const classHandler: ConvertHandler<"class"> = (
       at: getRange(node),
       props: {
         extends: ext?.text,
-        decorator: decorator?.text,
+        decorator: decorators,
       },
     });
 

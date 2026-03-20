@@ -2,6 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "symbex/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
+import { getDecorators } from "../utility/decorator";
 import flatPattern from "../utility/pattern";
 
 const methodHandler: ConvertHandler<"method"> = (
@@ -13,6 +14,11 @@ const methodHandler: ConvertHandler<"method"> = (
   for (const c of captures) {
     const { name, node, body, is_async, is_static, params, decorator } = c;
     const path = createChildPath(parent, name.text);
+    const decorators = decorator
+      ? getDecorators(decorator)
+          .map((d) => d.text)
+          .join(", ")
+      : undefined;
 
     result.edges.push({
       from: parent,
@@ -26,9 +32,9 @@ const methodHandler: ConvertHandler<"method"> = (
       at: getRange(node),
       props: {
         name: name.text,
-        is_static: is_static ? true : false,
-        is_async: is_async ? true : false,
-        decorator: decorator?.text,
+        is_static: !!is_static,
+        is_async: !!is_async,
+        decorator: decorators,
       },
     });
 

@@ -7,7 +7,7 @@ const options: Options = {
   esbuildPlugins: [scmPlugin],
   minify: false,
   target: ["node22", "node24", "node25"],
-  external: ["symbex", "tree-sitter-typescript"],
+  external: ["symbex", "tree-sitter-javascript"],
   sourcemap: false,
 };
 

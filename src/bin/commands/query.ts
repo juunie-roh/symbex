@@ -75,7 +75,7 @@ const queryCommand = createCommand("query")
   .option(
     "--max-start-depth <depth>",
     "Depth limit for query to start match from",
-    parseInt,
+    (v) => parseInt(v, 10),
     1,
   )
   .action((filePath, options) => {
@@ -141,10 +141,10 @@ const queryCommand = createCommand("query")
       const typeW = Math.max(...captures.map((c) => c.type.length));
       const rangeW = Math.max(...captures.map((c) => c.range.length));
 
-      console.log(`Match ${i}`);
+      process.stdout.write(`Match ${i}\n`);
       for (const c of captures) {
-        console.log(
-          `  ${c.name.padEnd(nameW)}  ${c.type.padEnd(typeW)}  ${c.range.padEnd(rangeW)}  ${c.preview}`,
+        process.stdout.write(
+          `  ${c.name.padEnd(nameW)}  ${c.type.padEnd(typeW)}  ${c.range.padEnd(rangeW)}  ${c.preview}\n`,
         );
       }
     });

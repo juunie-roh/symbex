@@ -29,7 +29,6 @@ const program = createCommand()
   .addOption(configOption)
   .addOption(encodingOption)
   .addOption(verboseOption)
-  .option("-l, --list", "print a list of nodes", false)
   .option("-d, --dot [name]", "print the graph in DOT format", false)
   .option("-o, --output <output>", "output file name", false)
   .commandsGroup(group.command.dev)
@@ -44,19 +43,23 @@ const program = createCommand()
 
     const graph = new Graph(nodes, edges);
 
-    if (options.list) {
-      console.log(graph.serialize());
+    let data: any = graph.serialize();
+
+    // if (options.tree) {
+    //   data = graph.tree();
+    // }
+
+    if (options.dot) {
+      data = printDotGraph(data, { indent: 2 });
     }
 
     if (options.output) {
       writeFileSync(
         resolve(process.cwd(), options.output),
-        JSON.stringify(graph.serialize()),
+        JSON.stringify(data),
       );
-    }
-
-    if (options.dot) {
-      console.log(printDotGraph(graph.serialize(), { indent: 2 }));
+    } else {
+      console.log(data);
     }
 
     if (others.length > 0) {

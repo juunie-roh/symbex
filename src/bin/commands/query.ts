@@ -3,57 +3,12 @@ import { readFileSync } from "node:fs";
 import { createCommand } from "@commander-js/extra-typings";
 import TSParser from "tree-sitter";
 
+import { assertTreeSitterLanguage } from "@/shared/checker";
+
 import { fileArg } from "../args";
 import BinaryError from "../error";
 import { group } from "../groups";
 import { encodingOption } from "../options";
-
-/**
- *  Validates whether the target is tree-sitter language module.
- */
-function isLanguage(m: unknown): m is TSParser.Language {
-  return (
-    typeof m === "object" &&
-    m !== null &&
-    "nodeTypeInfo" in m &&
-    Array.isArray(m.nodeTypeInfo) &&
-    "language" in m &&
-    m.language !== null
-  );
-}
-/**
- * Validates whether the target is a record of tree-sitter language module.
- */
-function isLanguageRecord(
-  target: unknown,
-): target is Record<string, TSParser.Language> {
-  return (
-    typeof target === "object" &&
-    target !== null &&
-    Object.values(target).length > 0 &&
-    Object.values(target).every(isLanguage)
-  );
-}
-
-/**
- * Coerces the target to be {@link TSParser.Language} type.
- */
-function assertLanguage(
-  name: string,
-  target: unknown,
-): asserts target is TSParser.Language {
-  if (!isLanguage(target)) {
-    if (isLanguageRecord(target)) {
-      // if a module exports the record of languages, output help message
-      queryCommand.error(
-        `[ERROR] ${name} requires a language spec: ${Object.keys(target).join(" or ")}`,
-      );
-    }
-
-    // throws on invalid module
-    queryCommand.error(`[ERROR] invalid tree-sitter language module: ${name}`);
-  }
-}
 
 const queryCommand = createCommand("query")
   .helpGroup(group.command.dev)
@@ -94,7 +49,11 @@ const queryCommand = createCommand("query")
 
     const language = options.grammarSpec ? mod[options.grammarSpec] : mod;
 
-    assertLanguage(options.grammar, language);
+    assertTreeSitterLanguage(
+      language,
+      options.grammar,
+      new BinaryError("BIN_INVALID_LANGUAGE", "Invalid tree-sitter language"),
+    );
 
     const parser = new TSParser();
     parser.setLanguage(language);

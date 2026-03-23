@@ -1,12 +1,19 @@
 import { SymbexError } from "./error";
 
-function defined(value: boolean, error?: SymbexError): asserts value;
+/**
+ * Coerces the target to be true.
+ */
+function defined(target: boolean, error?: SymbexError): asserts target;
+/**
+ * Coerces the target to be defined.
+ */
 function defined<T>(
-  value: T | null | undefined,
+  target: T | null | undefined,
   error?: SymbexError,
-): asserts value is T;
-function defined(value: any, error?: SymbexError) {
-  if (value === false || value === null || typeof value === "undefined") {
+): asserts target is T;
+
+function defined(target: any, error?: SymbexError) {
+  if (target === false || target === null || typeof target === "undefined") {
     throw error ?? new Error("Unspecified undefined error");
   }
 }

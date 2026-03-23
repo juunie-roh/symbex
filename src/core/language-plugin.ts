@@ -7,6 +7,7 @@ import type {
   PluginDescriptor,
   QueryConfig,
 } from "@/models";
+import { assertLanguagePlugin } from "@/shared/checker";
 import { createCapture, createConvert } from "@/utils";
 
 import CoreError from "./error";
@@ -23,8 +24,11 @@ class LanguagePlugin {
 
   private _convert: ReturnType<typeof createConvert<QueryConfig, Node, Edge>>;
 
+  private _name: TSParser.Language["name"];
+
   constructor(name: string) {
     this._module = LanguagePlugin.load(name);
+    this._name = this._module.language.name;
 
     this._capture = createCapture<QueryConfig>(
       this._module.query,
@@ -40,11 +44,47 @@ class LanguagePlugin {
     this._parser.setLanguage(this._module.language);
   }
 
+  static load(name: string): PluginDescriptor {
+    let m: PluginDescriptor;
+
+    try {
+      require.resolve(name);
+    } catch (e) {
+      throw new CoreError(
+        "CORE_PLUGIN_LOAD_FAILED",
+        `Plugin "${name}" not found`,
+        { cause: e },
+      );
+    }
+
+    try {
+      m = require(name).default;
+    } catch (e) {
+      throw new CoreError(
+        "CORE_PLUGIN_LOAD_FAILED",
+        `Plugin "${name}" threw during initialization`,
+        { cause: e },
+      );
+    }
+
+    assertLanguagePlugin(
+      m,
+      name,
+      new CoreError("CORE_PLUGIN_LOAD_FAILED", "Failed to load plugin"),
+    );
+
+    return m;
+  }
+
   /**
    * The {@link TSParser.Language | tree-sitter `Language`} instance used by this plugin.
    */
   get language() {
     return this._module.language;
+  }
+
+  get name() {
+    return this._name;
   }
 
   /**
@@ -87,83 +127,6 @@ class LanguagePlugin {
     });
 
     return result;
-  }
-}
-
-namespace LanguagePlugin {
-  /**
-   * Loads a language module with the name provided.
-   */
-  export function load(name: string): PluginDescriptor {
-    let m: PluginDescriptor;
-
-    try {
-      require.resolve(name);
-    } catch (e) {
-      throw new CoreError(
-        "CORE_PLUGIN_LOAD_FAILED",
-        `Plugin "${name}" not found`,
-        { cause: e },
-      );
-    }
-
-    try {
-      m = require(name).default;
-    } catch (e) {
-      throw new CoreError(
-        "CORE_PLUGIN_LOAD_FAILED",
-        `Plugin "${name}" threw during initialization`,
-        { cause: e },
-      );
-    }
-
-    assertModule(m, name);
-
-    return m;
-  }
-
-  /**
-   *
-   * @param m A module to validate.
-   */
-  function assertModule(
-    m: unknown,
-    name: string,
-  ): asserts m is PluginDescriptor {
-    const fail = (reason: string) => {
-      throw new CoreError(
-        "CORE_PLUGIN_LOAD_FAILED",
-        `Failed to load plugin "${name}": ${reason}`,
-      );
-    };
-
-    if (typeof m !== "object" || m === null) fail("module is not an object");
-
-    const mod = m as Record<string, unknown>;
-
-    if (!isLanguage(mod.language)) fail("missing or invalid 'language'");
-
-    if (!mod.query) fail("missing or invalid 'query'");
-
-    if (typeof mod.captureConfig !== "object" || mod.captureConfig === null)
-      fail("missing or invalid 'captureConfig'");
-
-    if (typeof mod.convertConfig !== "object" || mod.convertConfig === null)
-      fail("missing or invalid 'convertConfig'");
-  }
-
-  /**
-   * Returns whether.
-   * @param language {@link TSParser.Language | Language} instance to validate.
-   */
-  function isLanguage(language: unknown): language is TSParser.Language {
-    return (
-      typeof language === "object" &&
-      language !== null &&
-      "nodeTypeInfo" in language &&
-      language.nodeTypeInfo !== null &&
-      Array.isArray(language.nodeTypeInfo)
-    );
   }
 }
 

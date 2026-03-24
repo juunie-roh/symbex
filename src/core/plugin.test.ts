@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryMap } from "@/utils/query";
 
 import CoreError from "./error";
-import LanguagePlugin from "./language-plugin";
+import Plugin from "./plugin";
 
 // ---------------------------------------------------------------------------
 // Mock tree-sitter so no native binaries are required
@@ -14,7 +14,15 @@ const mockSetLanguage = vi.fn();
 
 vi.mock("tree-sitter", () => ({
   default: vi.fn(function () {
-    return { parse: mockParse, setLanguage: mockSetLanguage };
+    let _lang: unknown;
+    return {
+      parse: mockParse,
+      setLanguage: (l: unknown) => {
+        mockSetLanguage(l);
+        _lang = l;
+      },
+      getLanguage: () => _lang,
+    };
   }),
 }));
 
@@ -49,6 +57,7 @@ function fakeDescriptor() {
     query: fakeQueryMap(),
     captureConfig: {},
     convertConfig: {},
+    references: vi.fn(),
   };
 }
 
@@ -72,12 +81,12 @@ describe("LanguagePlugin.load()", () => {
       spyLoad({ default: null });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect(e).toBeInstanceOf(CoreError);
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
-        expect((e as CoreError).message).toContain("module is not an object");
+        expect((e as CoreError).message).toContain("is not an object");
       }
     });
 
@@ -85,11 +94,11 @@ describe("LanguagePlugin.load()", () => {
       spyLoad({ default: 42 });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
-        expect((e as CoreError).message).toContain("module is not an object");
+        expect((e as CoreError).message).toContain("is not an object");
       }
     });
 
@@ -103,7 +112,7 @@ describe("LanguagePlugin.load()", () => {
       });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
@@ -122,7 +131,7 @@ describe("LanguagePlugin.load()", () => {
       });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
@@ -141,7 +150,7 @@ describe("LanguagePlugin.load()", () => {
       });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
@@ -160,7 +169,7 @@ describe("LanguagePlugin.load()", () => {
       });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
@@ -179,7 +188,7 @@ describe("LanguagePlugin.load()", () => {
       });
 
       try {
-        LanguagePlugin.load(VALID_PLUGIN);
+        Plugin.load(VALID_PLUGIN);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_LOAD_FAILED");
@@ -192,7 +201,7 @@ describe("LanguagePlugin.load()", () => {
     it("returns a PluginDescriptor with the expected shape", () => {
       spyLoad({ default: fakeDescriptor() });
 
-      const descriptor = LanguagePlugin.load(VALID_PLUGIN);
+      const descriptor = Plugin.load(VALID_PLUGIN);
 
       expect(descriptor.query).toBeInstanceOf(QueryMap);
       expect(descriptor.captureConfig).toBeDefined();
@@ -207,11 +216,11 @@ describe("LanguagePlugin.load()", () => {
 // ---------------------------------------------------------------------------
 
 describe("LanguagePlugin", () => {
-  let plugin: LanguagePlugin;
+  let plugin: Plugin;
 
   beforeEach(() => {
-    vi.spyOn(LanguagePlugin, "load").mockReturnValue(fakeDescriptor());
-    plugin = new LanguagePlugin(VALID_PLUGIN);
+    vi.spyOn(Plugin, "load").mockReturnValue(fakeDescriptor());
+    plugin = new Plugin(VALID_PLUGIN);
   });
 
   afterEach(() => {

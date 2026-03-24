@@ -57,7 +57,7 @@ export function assertTreeSitterLanguage(
 /**
  * Coerces the target to satisfy {@link PluginDescriptor}.
  */
-export function assertLanguagePlugin(
+export function assertPluginDescriptor(
   target: unknown,
   name: string,
   error: SymbexError,

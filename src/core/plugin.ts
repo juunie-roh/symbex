@@ -7,7 +7,7 @@ import type {
   PluginDescriptor,
   QueryConfig,
 } from "@/models";
-import { assertLanguagePlugin } from "@/shared/checker";
+import { assertPluginDescriptor } from "@/shared/checker";
 import { createCapture, createConvert } from "@/utils";
 
 import CoreError from "./error";
@@ -15,7 +15,7 @@ import CoreError from "./error";
 /**
  * Represents a loaded and initialized symbex language plugin.
  */
-class LanguagePlugin {
+class Plugin {
   private _parser: TSParser;
 
   private _module: PluginDescriptor;
@@ -24,11 +24,8 @@ class LanguagePlugin {
 
   private _convert: ReturnType<typeof createConvert<QueryConfig, Node, Edge>>;
 
-  private _name: TSParser.Language["name"];
-
   constructor(name: string) {
-    this._module = LanguagePlugin.load(name);
-    this._name = this._module.language.name;
+    this._module = Plugin.load(name);
 
     this._capture = createCapture<QueryConfig>(
       this._module.query,
@@ -67,7 +64,7 @@ class LanguagePlugin {
       );
     }
 
-    assertLanguagePlugin(
+    assertPluginDescriptor(
       m,
       name,
       new CoreError("CORE_PLUGIN_LOAD_FAILED", "Failed to load plugin"),
@@ -80,11 +77,7 @@ class LanguagePlugin {
    * The {@link TSParser.Language | tree-sitter `Language`} instance used by this plugin.
    */
   get language() {
-    return this._module.language;
-  }
-
-  get name() {
-    return this._name;
+    return this._parser.getLanguage();
   }
 
   /**
@@ -112,6 +105,10 @@ class LanguagePlugin {
     }
   }
 
+  references(node: TSParser.SyntaxNode): string[] {
+    return this._module.references(node);
+  }
+
   extract(
     filePath: string,
     node: TSParser.SyntaxNode,
@@ -124,10 +121,11 @@ class LanguagePlugin {
       kind: "file",
       type: "scope",
       at: { name: filePath },
+      blockStartIndex: 0,
     });
 
     return result;
   }
 }
 
-export default LanguagePlugin;
+export default Plugin;

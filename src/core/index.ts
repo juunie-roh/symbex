@@ -1,6 +1,6 @@
 import Graph from "./graph";
 import GraphCursor from "./graph/cursor";
-import LanguagePlugin from "./language-plugin";
-import Parser from "./parser";
+import Plugin from "./plugin";
+import PluginHandler from "./plugin-handler";
 
-export { Graph, GraphCursor, LanguagePlugin, Parser };
+export { Graph, GraphCursor, Plugin, PluginHandler };

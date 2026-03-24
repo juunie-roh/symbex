@@ -3,6 +3,7 @@ import type TSParser from "tree-sitter";
 import JavaScript from "tree-sitter-javascript";
 
 // anonymous
+import ifQueryString from "@/queries/anonymous/if.scm";
 import iifeQueryString from "@/queries/anonymous/iife.scm";
 // binding
 import importQueryString from "@/queries/binding/import.scm";
@@ -22,6 +23,7 @@ export const language = JavaScript as TSParser.Language;
 
 export const query = new QueryMap<keyof QueryConfig>(language)
   // anonymous
+  .set("if", ifQueryString)
   .set("iife", iifeQueryString)
   // binding
   .set("import", importQueryString)

@@ -1,6 +1,10 @@
 import type * as symbex from "symbex";
 
 export type QueryConfig = {
+  if: {
+    required: "node" | "body" | "condition";
+    optional: "else" | "else_body";
+  };
   iife: {
     required: "node" | "body";
     optional: never;
@@ -33,7 +37,7 @@ export type QueryConfig = {
 
 export type BypassQueryKey = "export";
 
-export type NodeKind = keyof QueryConfig | "parameter" | "component";
+export type NodeKind = keyof QueryConfig | "parameter" | "component" | "else";
 
 export type Node = symbex.Node<NodeKind>;
 

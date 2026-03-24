@@ -33,7 +33,7 @@ export type QueryConfig = {
 
 export type BypassQueryKey = "export";
 
-export type NodeKind = keyof QueryConfig | "parameter";
+export type NodeKind = keyof QueryConfig | "parameter" | "component";
 
 export type Node = symbex.Node<NodeKind>;
 

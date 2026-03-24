@@ -1,8 +1,19 @@
 import { createChildPath, createConvertResult, getRange } from "symbex/utils";
+import type { SyntaxNode } from "tree-sitter";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
 import flatPattern from "../utility/pattern";
+
+function handlesJSX(node: SyntaxNode): boolean {
+  return (
+    node.descendantsOfType(
+      ["jsx_element", "jsx_self_closing_element"],
+      node.startPosition,
+      node.endPosition,
+    ).length > 0
+  );
+}
 
 const functionHandler: ConvertHandler<"function"> = (
   captures,
@@ -24,7 +35,7 @@ const functionHandler: ConvertHandler<"function"> = (
     result.nodes.push({
       path,
       type: "scope",
-      kind: "function",
+      kind: handlesJSX(body) ? "component" : "function",
       at: getRange(node),
       blockStartIndex: body.startIndex,
       props: { is_async: !!is_async },

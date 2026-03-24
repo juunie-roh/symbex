@@ -41,8 +41,6 @@ export type EdgeKind = "defines" | "extends" | "imports" | "contains";
 
 export type Edge = symbex.Edge<EdgeKind>;
 
-export type Graph = symbex.Graph<Node, Edge>;
-
 export type CaptureConfig = symbex.CaptureConfig<QueryConfig>;
 
 export type SingleCaptureResult<K extends keyof QueryConfig> =

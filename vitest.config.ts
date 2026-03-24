@@ -11,12 +11,12 @@ export default defineConfig({
   test: {
     include: [
       "src/**/*.(test|spec).*",
-      "packages/typescript/src/**/*.(test|spec).*",
+      "packages/javascript/src/**/*.(test|spec).*",
     ],
     exclude: ["**/node_modules/**"],
     environment: "node",
     coverage: {
-      include: ["src/**", "packages/typescript/src/**"],
+      include: ["src/**", "packages/javascript/src/**"],
       exclude: [
         "**/index.*",
         "**/__mocks__/**",

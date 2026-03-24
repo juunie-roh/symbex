@@ -1,4 +1,4 @@
-# symbex: Language-Agnostic Scope Graph Provider
+# symbex: Structural Code Comprehension
 
 ## Origin
 
@@ -32,42 +32,73 @@ Current AI code assistants retrieve code through text-based search — semantic 
 - The AI re-parses text into structural understanding on every retrieval
 - Results include noise: code that *mentions* a concept vs. code that *performs* it
 
-## The Proposal
+## What symbex Is
 
-Build a scope graph provider that extracts scope boundaries and name bindings from source code using tree-sitter, producing a queryable scope graph enriched with semantic relationships. The tool is consumer-agnostic — AI assistants, IDE navigation, documentation generators, refactoring tools, and dependency analysis are all valid consumers. The tool is the graph; what queries it is up to the consumer.
+symbex is a structural code comprehension tool. It answers one question on demand: **where did this come from?**
 
-During development the goal evolved.
+Given a position in source code, symbex traces the provenance of every symbol the scope depends on — what each name resolves to and where each definition originates. The result is a precise dependency set for that scope: exactly the declarations needed to understand the implementation, nothing more.
 
-The initial motivation was improving AI context retrieval, but the resulting structure naturally forms a navigable symbol graph. Instead of treating the graph purely as an AI retrieval backend, it becomes an **on-demand code navigator**: a surface that shows only what has been asked for.
+The scope graph is the mechanism, not the product. The product is a set of resolved cursors pointing to the definitions a scope depends on, each carrying a position pointer to load source on demand. The consumer — AI agent, IDE, human — gets precisely the code needed to reason about one piece of implementation.
 
 ```text
 Current:   AI → text search → fuzzy text matches → AI re-parses into understanding
-Proposed:  AI → symbex → structural matches → AI uses results directly
+symbex:    AI → scope graph → provenance trace → precise dependency set
 ```
 
-Structural search removes invalid states from the generation space: if a function isn't in the index, it can't be referenced. This doesn't correct hallucinations after the fact — it prevents them.
+### A Different Question
 
-## Consumption Story: On-Demand Navigation
+Every other tool in this space asks "where is this symbol and who uses it?" — a cartographic question that requires mapping everything. symbex asks "where did this come from?" — a genealogical question that requires only following the lineage of what you're looking at.
 
-symbex enables reading code on demand. The graph is a table of contents with resolution:
+This follows the natural direction of code comprehension. When you read code, you encounter a symbol and look up where it came from. You never pause mid-reading to ask "who else uses this across the codebase." That's a different task (impact analysis), not comprehension.
 
-1. **A file's declarations tell you what exists.** Within a file, every symbol defined is recorded as a node.
-2. **Scope walk tells you what each symbol refers to.** Every symbol encountered while reading an implementation can be resolved through the scope chain.
-3. **The position pointer tells you where to read.** If further exploration is needed, load the source from the position where the node is defined.
+Other tools optimized for bidirectional resolution — "find definition" and "find all references." Both directions require indexing every reference occurrence. symbex only traces forward: from usage to origin. This requires only declaration indexing, not reference indexing. The graph is smaller, resolution is cheaper, and results are precise to the scope you're in.
 
-You never load code you didn't ask about. The graph is the map; the source is loaded through the position pointer only when the reader says "show me."
+### Composable with Search Tools
 
-This principle — **show only what has been asked** — runs through every layer:
+symbex doesn't need its own "find" capability. It sits downstream of search tools:
 
-- **AI agent consumption**: Instead of stuffing 50 files into context, the agent starts at one file's graph, sees declarations, resolves the symbols it encounters, and pulls in source only for nodes it needs to understand. The context window fills with relevant code, not adjacent code.
-- **IDE-linked navigator**: Show a clustered graph. User clicks a node → expand the implementation from the range pointer. Ctrl-click on a symbol → `resolve()` fires, walks the scope chain, crosses files if needed, and jumps to that definition's node. The graph and source stay linked — you always know where you are in the structure.
-- **Dependency tracing as a side effect**: Start at a function. Read its implementation. Every symbol resolved produces a cursor. Those cursors *are* the direct dependencies. Follow their symbols too and you get transitive dependencies. The depth you go is the depth of the graph you build. This is precise — you don't get "every import in the file," you get only the symbols the function actually references within its scope.
+- **ast-grep** finds *where* something is (structural pattern match)
+- **symbex** explains *what it depends on* (provenance trace)
 
-Three consumers — AI agent, IDE navigator, dependency analyzer — same graph, same cursor, same lazy resolution.
+The integration surface is a file path and a byte offset. ast-grep gives a location. symbex takes that location and traces its dependency chain.
 
-## What This Actually Is: A Scope Graph
+## The Comprehension Loop
 
-The unifying principle behind symbex is scope graph construction. Every query, handler, and bypass performs the same fundamental operation: identifying scope boundaries and extracting the names introduced within them.
+Parsing a file produces two things: a `Graph` (the declaration skeleton) and a `Tree` (the raw AST). The graph records what exists. The tree retains implementation detail. The `at: Range` on each graph node bridges them.
+
+```text
+graph node (at: Range)
+  → tree.rootNode.descendantForIndex(start, end)
+  → tree-sitter SyntaxNode
+  → implementation body
+  → getReferences(body)           [plugin-provided]
+  → string[] of referenced names
+  → cursor.resolve(name) for each
+  → set of dependency cursors
+```
+
+1. Start at a node in the graph (via `atPosition()` from a byte offset)
+2. Use `at: Range` to reach into the tree for the implementation subtree
+3. Run `getReferences()` — a plugin-provided function that walks the AST and extracts every referenced identifier (e.g. `flatExpression` for JavaScript)
+4. Pass each name to `cursor.resolve()` — scope-walk finds the declaration
+5. Each resolved cursor is a dependency. Its `at` tells the consumer what to do next:
+   - `Range` → read the source at that position
+   - `NodeSource` → follow the import path, parse that file on demand, continue
+
+The consumer decides the depth. One hop gives direct dependencies. Following those gives transitive dependencies. The graph never loads code the consumer didn't ask about.
+
+### Why Graph + Tree
+
+The graph and tree serve different purposes and neither duplicates the other:
+
+- **Graph**: structure and resolution. What scopes and bindings exist, how they nest, how names resolve through the scope chain. Declaration-only — no implementation detail.
+- **Tree**: implementation detail. The full AST for reading function bodies, extracting referenced identifiers, accessing source text. Retained from the same parse that produced the graph.
+
+`Parser.parse()` returns `{ graph, tree }`. Both are products of one parse. The consumer holds the pair. The parser stays stateless.
+
+## The Scope Graph
+
+The scope graph is the structural index that enables comprehension. Every query, handler, and bypass performs the same fundamental operation: identifying scope boundaries and extracting the names introduced within them.
 
 A **scope** is a region of code where names are valid — a file, a function body, a class body, a block.
 
@@ -75,11 +106,9 @@ A **binding** is a name introduced into a scope — a variable declaration, a fu
 
 Some constructs are both: a function introduces a name into its parent scope (binding) and creates a new scope in which its own parameters and local declarations live (scope).
 
-The `defines` edge is the scope-to-binding relationship. This is why in the output graph the node/edge count is nearly 1:1 — it's a scope containment tree. The graph visualization is literally a scope graph rendered spatially.
+The `defines` edge is the scope-to-binding relationship. The graph is a scope containment tree.
 
 ### Node Roles
-
-Every node in the graph falls into one of three categories:
 
 | Role | Description | Current `kind` values |
 | ---- | ----------- | --------------------- |
@@ -87,67 +116,9 @@ Every node in the graph falls into one of three categories:
 | **Pure binding** | Gets introduced, doesn't introduce names | `variable`, `member`, `import`, `abstract_method` |
 | **Anonymous scope** | Introduces names but has no binding identity of its own | (planned: `if`, `switch`, `for`, `while`) |
 
-The file itself is the root scope but is not represented as a node — it is the implicit root of the path hierarchy.
-
-## Architecture
-
-### Core Principle: AST as Entry Point, Not Container
-
-The AST index does not hold full code content. Each AST node is a lightweight entry point that records structural metadata and points back to the source file and line range. Detailed code is accessed only when needed.
-
-This means:
-
-- Fast structural searches without loading all code into memory
-- Memory-efficient: only load detailed code when the consumer actually needs it
-- Fewer hallucinations: by constraining the view to an explicit structural index, non-existent functions can't be referenced and invalid dependencies can't be invented
-
-### Three-Layer Plugin Architecture
-
-The system is composed of three distinct layers with clear, narrow contracts:
-
-```text
-tree-sitter AST
-    ↓
-[language plugin]
-        ↓
-    capture()           → raw CaptureResult  (complete, minimal no opinions)
-        ↓
-    convert()           → shaped Node[] + Edge[]  (opinionated view)
-    ↓
-[core]                  → builds index, serves queries
-```
-
-Each layer has a single responsibility:
-
-- **Language plugin**: faithfully converts what tree-sitter gives into the common schema. No filtering decisions, no abstraction judgments. Just be complete and honest.
-- **Abstraction plugin**: decides what story to tell from the raw graph. What constructs are promoted to first-class nodes, what gets flattened, what gets excluded. Multiple abstraction plugins can produce different views over the same raw graph.
-- **Core**: owns the schema, the index, and the query API. Operates on `Node[]` and `Edge[]` without knowing anything about the source language.
-
-The three-way responsibility separation is:
-
-```text
-language plugin    →  what exists
-abstraction plugin →  what matters
-core               →  what's queryable
-```
-
-### Node Schema: A Human Vocabulary, a custom IR
-
-The common `Node` schema is not a compiler intermediate representation. It is a formalization of the vocabulary developers already use when reasoning about code — concepts that are human-recognizable, cross-language, and aligned with how AI models represent code (having learned from human-written source and documentation).
-
-The schema captures concepts that already have names: function, class, import, dependency, interface. These are stable across languages even when syntax varies wildly. Language-specific constructs that don't map to common vocabulary live in an optional `props` field that core passes through without interpreting.
-
-This approach means the Node schema is discovered, not invented. The vocabulary already exists — symbex formalizes it.
-
-Nodes must be recognizable to humans because:
-
-- The target output is a navigable, mind map-style symbol graph
-- AI models vectorize text based on human language — a human-legible schema is more aligned with model reasoning than a machine-optimized IR
-- Contributors need to understand the schema to write plugins
+The file itself is the root scope — the implicit root of the path hierarchy.
 
 ### Data Model
-
-All output is expressed as two types:
 
 ```ts
 type NodeSource = { name: string; external?: boolean };
@@ -168,29 +139,16 @@ interface Edge<K extends string = string> {
 }
 ```
 
-The `at` field is a discriminated union that serves two purposes:
+The `at` field is a discriminated union:
 
-- **Local declarations** carry a `Range` — the exact file position where the declaration exists. The navigator uses this to load source on demand.
-- **Import bindings** carry a `NodeSource` — the module specifier the binding comes from, with an `external` flag indicating whether it's a local file (resolvable) or a package dependency (terminal). The navigator uses this to follow cross-file references.
+- **Local declarations** carry a `Range` — the position in file. The comprehension loop uses this to bridge into the tree.
+- **Import bindings** carry a `NodeSource` — the module specifier, with `external` flag. `external: true` is a hard stop (package dependency, no file to resolve). `external: false` means follow the path to another file.
 
-This eliminates the need for separate module nodes. Import bindings carry their own provenance. The graph contains only things that actually exist as bindings or scopes in the source.
-
-Node IDs use scope-chain path arrays: `["file.ts", "Foo"]` for top-level declarations, `["file.ts", "Foo", "bar"]` for class members. The `HashRegistry` produces compact SHA-256-derived `NodeId` hashes for O(1) bidirectional lookup. The ID encodes scope, which the graph's edge resolver uses to walk upward.
-
-Language plugins declare their own `kind` vocabularies as constrained string unions:
-
-```ts
-type NodeKind = "function" | "class" | "method" | "member" | "variable" | "type";
-type EdgeKind = "imports" | "implements" | "extends" | "defines" | "constrained";
-```
-
-Core operates on the `string` generic without knowing specific kinds.
+Node IDs use scope-chain path arrays hashed via `HashRegistry` (SHA-256 truncated) for O(1) bidirectional lookup.
 
 ### Semantic Declarations, Not Grammar Artifacts
 
-symbex is a structure specifier over stabilized grammar expressions, not a grammar validator. Declarations are classified by what they semantically *are*, not how the parser internally represents them.
-
-`const foo = () => {}` is a function declaration. The grammar sees a variable declarator with an arrow function value; symbex sees a function. The grammar detail is an implementation concern of the capture step, not something that leaks into the graph. This means:
+Declarations are classified by what they semantically *are*, not how the parser represents them:
 
 - `function f() {}` and `const f = () => {}` both produce `kind: "function"` nodes
 - `function f() {}` and `const f = function() {}` both produce `kind: "function"` nodes
@@ -198,7 +156,7 @@ symbex is a structure specifier over stabilized grammar expressions, not a gramm
 
 ### Import Model: Bindings with Provenance
 
-Import bindings are first-class nodes in the file scope. Each import statement introduces bindings that carry their source provenance in the `at` field:
+Import bindings are first-class nodes carrying source provenance in `at`:
 
 ```ts
 // import { foo as bar } from "./module"
@@ -211,140 +169,75 @@ Import bindings are first-class nodes in the file scope. Each import statement i
 }
 ```
 
-The `imports` edge goes from parent scope to import binding, same direction as `defines`. The edge kind is the discriminator between "this scope defines this name" and "this scope imports this name."
-
-The `external` flag on `NodeSource` provides a hard stop for the navigator — don't try to load a graph for `react`, there's no file to resolve into.
-
-Aliased imports use the alias as the node name (the locally visible identifier) with `props.alias_of` pointing to the original name. Type-only imports (`import type`) are classified as `kind: "type"` rather than `kind: "variable"`.
-
-### Destructuring as Recursive Binding Extraction
-
-Variable destructuring (`const { a, b: { c } } = obj`) introduces multiple flat bindings into the enclosing scope. A dedicated `pattern` query and handler recursively walks nested patterns — `object_pattern`, `array_pattern`, `rest_pattern`, `assignment_pattern` — bottoming out at `identifier` nodes that produce actual binding nodes.
-
-The pattern handler is the recursive core. It dispatches on `node.type` and for compound patterns recurses via `convert(capture(pattern, "pattern"), parentId, "pattern")`. Leaf identifiers produce nodes; nested patterns produce more recursion. Default values and alias keys are captured at the pattern level via `@default` and `@key` captures. Declaration-level metadata (kind, type annotation) is attached by the variable handler via post-decoration after the pattern pipeline returns.
-
-### Call Edges: Explicitly Deferred
-
-Call edges are not stored in the graph.
-
-Call relationships can be derived on demand by resolving the callee identifier through the scope graph. Since the scope graph already contains all bindings within each scope, call resolution is simply a scoped name lookup.
-
-Storing call edges would duplicate information that can be reconstructed cheaply from the binding graph.
-
-### Abstraction Plugin as Lens
-
-The abstraction layer is where opinionated views are defined. The same raw graph can produce multiple views:
-
-- **Mind map**: excludes anonymous functions, flattens callbacks into owner, surfaces named callables only
-- **Full fidelity**: keeps everything the language plugin produces
-- **Public API surface**: strips internal functions, surfaces only exported callables
-
-The abstraction plugin is a lens, not a filter. Same underlying data, different perspectives. This makes getting the abstraction level wrong recoverable — replace just that layer without touching the parse pipeline or index.
-
-The abstraction layer currently exists implicitly within the plugin's convert functions rather than as a distinct component. Formalizing it as a separate layer is planned but deferred until the plugin architecture settles.
+The `imports` edge goes from parent scope to import binding, same direction as `defines`. No separate module nodes. The graph contains only things that actually exist as bindings or scopes in the source.
 
 ## Graph Cursor
 
-The `GraphCursor` is an immutable traversal primitive that serves three roles:
+The `GraphCursor` is the primary interface for comprehension. It serves as:
 
-1. **Navigation**: `parent()`, `children()`, `nearest()` for walking the scope tree. `atPosition()` syncs a source file offset to the deepest graph node at that position — the IDE sync entry point.
-2. **Query substrate**: Queries compose cursor operations but return data, not cursors. The cursor stays a traversal tool; queries answer questions.
-3. **Dependency tracing**: Each `resolve()` call produces a cursor pointing to the resolved binding. The collection of cursors accumulated while reading a function's implementation *is* that function's dependency set — precise to the symbols actually referenced, not the file's full import list.
+1. **Navigation primitive**: `parent()`, `children()`, `nearest()` for walking the scope tree.
+2. **Resolution engine**: `resolve(symbol)` walks the scope chain to find where a name was declared.
+3. **Dependency tracer**: Each resolved cursor *is* a dependency. The collection accumulated during comprehension is the dependency set.
+4. **IDE sync point**: `atPosition(graph, offset)` maps a source position to the deepest graph node — the entry point from a file location into the structural world.
 
 ```ts
 class GraphCursor {
-  // Navigation
   parent(): GraphCursor | undefined;
   children(edgeKind?: string): GraphCursor[];
   nearest(predicate: (cursor: GraphCursor) => boolean): GraphCursor | undefined;
-
-  // Resolution
   resolve(symbol: string): GraphCursor | undefined;
-
-  // IDE sync
   static atPosition(graph: Graph, offset: number): GraphCursor | undefined;
 
-  // Accessors
   get node(): GraphNode;
   get path(): NodePath;
   get depth(): number;
 }
 ```
 
-`resolve()` walks up the scope chain via `nearest()`, looking for a scope that contains a child with the matching name. It returns the *child* cursor (the binding), not the scope cursor (the parent where the binding lives). In Phase 2, when resolution hits an import binding with a `NodeSource` in `at`, it follows the source path to load the target file's graph and continues resolution there.
+`resolve()` walks up the scope chain via `nearest()`, finds the first ancestor scope that contains a child with the matching name, and returns the *child* cursor (the binding). In cross-file resolution, when it hits an import binding with a `NodeSource` in `at`, it follows the source path to load the target file's graph and continues there.
 
 ## Plugin Architecture
 
-### Capture / Convert Pipeline
+A language plugin has two responsibilities:
 
-The plugin architecture is built around a two-phase pipeline:
+1. **Declaration extraction** — identify scopes and bindings from source (the `capture/convert` pipeline)
+2. **Reference extraction** — identify referenced identifiers from implementation bodies (`getReferences`)
+
+These are separate concerns. Declaration extraction builds the graph. Reference extraction reads the tree. Both are language-specific.
+
+### Plugin Descriptor
+
+```ts
+type PluginDescriptor = {
+  language: TSParser.Language;
+  query: QueryMap;
+  captureConfig: CaptureConfig;
+  convertConfig: ConvertConfig;
+  getReferences: (body: TSParser.SyntaxNode) => string[];  // reference extraction
+};
+```
+
+`getReferences` is a pure function that walks a tree-sitter subtree (typically a function/method body) and returns all referenced identifier names. For JavaScript, this is `flatExpression` — it recurses through expression node types, bottoming out at `identifier` nodes that represent scope-walk targets. `member_expression` only recurses into the object (root reference), not the property — `foo.bar.baz` yields `["foo"]`.
+
+### Capture / Convert Pipeline
 
 **`capture()`** — runs tree-sitter queries against AST nodes and returns typed match results. Faithful extraction — no filtering or semantic interpretation.
 
-**`convert()`** — transforms captures into graph nodes and edges. This is where semantic decisions happen: what kind of node to produce, what edges to emit, whether to recurse into child scopes.
+**`convert()`** — transforms captures into graph nodes and edges. Semantic decisions: what kind of node, what edges, whether to recurse into child scopes.
 
 Both are created via core factory functions (`createCapture`, `createConvert`) that wire together configuration, type safety, and recursive composition.
 
 ### Depth-Gated Query Execution
 
-Queries are executed with `maxStartDepth` control via tree-sitter's `QueryOptions`, which prevents the query engine from exploring children at a depth beyond the specified limit. The default depth is 1, meaning queries match only direct children of the target node.
+Queries are executed with `maxStartDepth` control:
 
-- `maxStartDepth: 0` — destructure the target node itself (the pattern root must be the target node). Used when an extracted node is already the exact construct to match.
-- `maxStartDepth: 1` — match direct children of the target node. The default for "what does this scope introduce?"
-- `maxStartDepth: unlimited` — full subtree traversal (the old behavior, now opt-in).
-
-This is set on `QueryMap.match()`, which passes it through to `query.matches(node, { maxStartDepth })`. The depth limit only constrains where a pattern's root node can begin matching — the pattern's own internal structure (field captures, child nodes) still resolves at whatever depth the pattern defines.
+- `maxStartDepth: 0` — destructure the target node itself.
+- `maxStartDepth: 1` — match direct children (default).
+- `maxStartDepth: unlimited` — full subtree traversal (opt-in).
 
 ### Bypass Mechanism
 
-Some syntactic wrappers (like `export_statement`) place declarations at a depth that `maxStartDepth: 1` misses. The bypass mechanism solves this: per-query-tag functions that use precompiled extraction queries to pierce wrappers and return the unwrapped nodes for matching.
-
-```ts
-// CaptureConfig — per-tag options
-type CaptureConfigOptions = {
-  bypass?: (node: TSParser.SyntaxNode) => TSParser.QueryMatch[];
-  maxStartDepth?: number;
-};
-```
-
-Bypass queries live in a separate `QueryMap` instance, compiled once at plugin initialization alongside the main queries. Each bypass function checks the node type, runs the extraction query, then calls back into the main `QueryMap.match()` with `maxStartDepth: 0` against the extracted nodes.
-
-```ts
-// Example: export class Foo {} — class is at depth 2 from program
-class: {
-  bypass(node) {
-    if (node.type === "program") {
-      const extracted = bypass.get("export_class")
-        .captures(node, { maxStartDepth: 1 })
-        .filter(c => c.name === "node")
-        .map(c => c.node);
-      return extracted.flatMap(c =>
-        query.match("class", c, { maxStartDepth: 0 })
-      );
-    }
-    return [];
-  }
-}
-```
-
-### Handler-Per-Tag Structure
-
-Each query tag has a corresponding convert handler under `handlers/`. A `ConvertConfig` mapped type enforces every key in `QueryConfig` has a handler — omissions are compile errors.
-
-Handlers receive typed captures, a parent scope ID, and a `ConvertContext` that provides `capture` and `convert` for recursive scope descent:
-
-```ts
-// class handler — captures class, recurses into body for methods/members
-const classHandler: ConvertHandler<"class"> = (captures, parentId, { capture, convert }) => {
-  for (const c of captures) {
-    // emit class node + defines edge
-    if (c.body) {
-      result.push(convert(capture(c.body, "method"), id, "method"));
-      result.push(convert(capture(c.body, "member"), id, "member"));
-    }
-  }
-};
-```
+Export wrappers place declarations at unreachable depth. The bypass pierces them — a single parameterized `bypassExport(queryKey)` function handles all export forms. Adding bypass support for a new construct is just `bypass: bypassExport("newTag")` in the capture config.
 
 ### Plugin File Structure
 
@@ -352,204 +245,151 @@ const classHandler: ConvertHandler<"class"> = (captures, parentId, { capture, co
 packages/<lang>/
   src/
     queries/           ← .scm files, one per construct
-      class.scm
-      function.scm
-      variable.scm
-      pattern.scm
-      bypass/          ← extraction queries for syntactic wrappers
-        export_class.scm
-        export_function.scm
     handlers/          ← convert handlers, one per query tag
-      class.ts
-      function.ts
-      variable.ts
-      pattern.ts
-    types.ts           ← QueryConfig, BypassQueryConfig, Node, Edge type aliases
+    references/        ← getReferences implementation (flatExpression, flatPattern)
+    types.ts           ← QueryConfig, Node, Edge type aliases
     query.ts           ← QueryMap instances (main + bypass)
     capture.ts         ← CaptureConfig with bypass wiring
     convert.ts         ← ConvertConfig with handler registration
-    index.ts           ← plugin exports
+    index.ts           ← plugin exports (descriptor)
 ```
 
 ### Core Infrastructure
 
-- **`Parser`** — instantiated with a `Config`, maps file extensions to `Language` instances, dispatches `parse(filePath, source)` to the correct plugin.
-- **`LanguagePlugin`** — wraps a tree-sitter parser for one plugin. `extract()` runs the plugin's `capture()` then `convert()` to produce `{ nodes, edges }`. Plugin loading uses duck-typing for cross-bundle compatibility.
-- **`Graph`** — built from `{ nodes, edges }`. The graph stores only declaration edges. `HashRegistry` maps `NodePath` arrays to compact `NodeId` hashes for O(1) bidirectional lookup. Supports `parent()`, `depth()`, `path()`, `adjacent()`, and `serialize()`.
-- **`GraphCursor`** — immutable traversal primitive over `Graph`. Navigation, resolution, and IDE sync via `atPosition()`. See [Graph Cursor](#graph-cursor) section.
-- **`QueryMap`** — a typed `Map<K, TSParser.Query>` that compiles string query patterns into tree-sitter Query instances, enforces unique keys, provides type-safe lookup, and executes depth-gated matching via `match()`. Also exposes `create()` for ad-hoc query compilation.
-- **`scmPlugin`** — an esbuild plugin that normalizes `.scm` query files at build time (stripping comments, collapsing whitespace) and emits them as JS default exports. Plugin packages reference this in their tsup config.
-- **`createCapture`** — core factory that binds a `QueryMap` and `CaptureConfig` into a capture function with two overloads: full capture (all tags) and single-tag capture (for recursive use inside convert handlers).
-- **`createConvert`** — core factory that binds a capture function and `ConvertConfig` into a convert function, threading `ConvertContext` into handlers.
-
-### What Tree-sitter Actually Gives You
-
-Verified through hands-on exploration. Parsing a TypeScript class produces a tree where each node already carries the metadata the index needs:
-
-- **`node.type`**: the structural kind (`class_declaration`, `method_definition`, `public_field_definition`, etc.)
-- **`node.startPosition` / `node.endPosition`**: exact row/column locations — the pointer back to source
-- **`node.text`**: the full source text the node spans, accessible on demand
-- **`node.namedChildren`**: semantically meaningful children (filters out syntax noise like braces and keywords)
-
-Tree-sitter gives the structural parsing for free. symbex's job is the indexing and query layer on top.
-
-### Why Tree-sitter
-
-Tree-sitter already parses ~200 languages into consistent tree structures. It provides a uniform tree format across languages, so the tool has a consistent interface regardless of what language the codebase uses. Different languages produce different AST shapes, but the format is consistent, the parsing is fast and incremental, and the tooling ecosystem is mature.
+- **`Parser`** — maps file extensions to plugins, dispatches `parse(filePath, source)` → `{ graph: Graph, tree: Tree }`.
+- **`Graph`** — declaration-only scope containment tree. `HashRegistry` for O(1) path↔id lookup. Supports `parent()`, `depth()`, `path()`, `adjacent()`, `serialize()`.
+- **`GraphCursor`** — immutable traversal and resolution over `Graph`.
+- **`QueryMap`** — typed query compilation and depth-gated matching.
+- **`createCapture` / `createConvert`** — factory functions with full type enforcement.
+- **`scmPlugin`** — esbuild plugin for `.scm` normalization at build time.
 
 ## Key Design Decisions
 
-### Index Stores Data, Not Live References
+### Declaration-Only Graph
 
-The index stores query results as plain, serializable data rather than maintaining live tree-sitter references. This eliminates complex memory management around tree-sitter's node lifecycle.
+symbex does not index references. Only declarations (bindings) are stored. References are extracted on demand from the tree via `getReferences()` and resolved through the scope chain. This is not a missing feature — it's the core design. Forward provenance tracing doesn't need reference indexing.
 
-### References Are Not Indexed
+### Graph Is the Medium, Not the Output
 
-symbex does not store reference edges.
-
-Only declarations (bindings) are indexed. References are resolved dynamically by walking the scope graph and matching identifiers against bindings visible in that scope.
-
-This keeps the graph minimal while preserving the ability to resolve references when needed.
+The scope graph enables comprehension but isn't what the consumer receives. The consumer receives a set of resolved cursors — the dependency set for a scope. The graph is the structural index that makes precise resolution possible. The tree is the implementation detail that makes reference extraction possible. Together they produce the comprehension result.
 
 ### Export Statements Are Transparent Wrappers
 
-Export statements don't introduce scopes or bindings themselves — they're syntactic wrappers. The bypass mechanism pierces them to extract the actual declaration. This means `export class Foo {}` and `class Foo {}` produce identical graph structures.
-
-### Capture Tags as Authoritative Vocabulary
-
-Query capture tags (e.g., `@function`, `@import`, `@class`) serve as the canonical vocabulary for node kinds. The `.scm` files define what constructs the plugin recognizes.
-
-### Import Kind as Future Metadata
-
-Discriminating import types (named/default/namespace) matters less for Phase 1 single-file graphs but is captured now as `props.type` for Phase 2 cross-file resolution. Namespace imports like `ns.foo()` should resolve as direct calls rather than opaque member access — but building logic around this is deferred.
-
-### Edge Schema Captures All Relationships
-
-Edges are first-class for all relationship types (implements, extends, aliases, defines, imports), not just function calls. Type relationships that text search cannot discover — like which class implements which interface — are structurally queryable in the graph.
-
-### Scope Discipline
-
-Complex cases (anonymous functions, cross-file resolution, static method disambiguation, call edges) are consistently excluded from Phase 1. Problems are named and noted for later phases rather than half-solved now.
+The bypass mechanism pierces exports to extract the actual declaration. `export class Foo {}` and `class Foo {}` produce identical graph structures.
 
 ### False Edges Are Worse Than Absent Ones
 
-Call edges require compiler-level type resolution. Syntactic capture alone produces unreliable attribution and pollutes the graph. Edges that might be wrong degrade consumer trust more than edges that are missing.
+Call edges, type resolution, and other compiler-level analysis are not attempted. Edges that might be wrong degrade trust more than edges that are missing.
 
 ### Queries Return Data, Navigation Returns Cursors
 
-The cursor is a traversal primitive. Queries compose cursor operations to answer questions and return plain data — filtered nodes, dependency lists, structural matches. Navigation returns cursors for continued traversal. This keeps the query layer optimizable independently: data queries can pre-filter and project without cursor allocation overhead.
+The cursor is a traversal primitive. The comprehension loop uses cursors internally but the final output — the dependency set — is data about which nodes the scope depends on and where they originate.
 
 ## Current State of the Field (as of Mar 2026)
 
 ### What exists
 
-- **Scope Graphs (Visser et al., TU Delft)** — The academic framework for modeling name binding. A scope graph represents declarations and references associated with scopes connected by edges; name resolution is path-finding from references to declarations. Implemented in the Spoofax language workbench via the Statix meta-language. Theoretical and tied to specific compiler frameworks.
-- **Stack Graphs (GitHub)** — Practical extension of scope graphs powering GitHub's Precise Code Navigation. Built on tree-sitter with a graph construction DSL (`tree-sitter-graph`). File-incremental: each file's subgraph is constructed in isolation and merged at query time. Name resolution uses symbol stack path-finding with precedence-based shadowing. Open source in Rust. Language definitions exist for Python, TypeScript, JavaScript, Java. Language support is limited and adding new languages requires maintaining complex `.tsg` rule files. Storage uses SQLite.
-- **Sourcegraph Cody**: AI assistant backed by Sourcegraph's code indexing engine. Uses embeddings and search to retrieve relevant snippets. The structural knowledge is implicit in the index, not exposed as a queryable artifact.
-- **ast-grep**: CLI tool that matches AST patterns instead of text using tree-sitter. Structural search, lint, and rewrite with metavariable wildcards. No persistent index — every run is a fresh parse-and-match. No relational model between declarations. Written in Rust, fast across large codebases.
-- **Tree-sitter + RAG pipelines**: Some teams use AST-aware chunking (splitting code at structural boundaries rather than token counts) before embedding into vector databases. But the embeddings themselves flatten structure back into token space.
-- **Meta's Glean**: Open-source code indexer that collects structural facts about code with a declarative query language (Angle). Right shape (structured facts, queryable) but practically inaccessible — OSS version only ships a C++ parser, and the Thrift RPC layer is tied to Meta's internal tooling.
-- **AI coding tools (Cursor, Claude Code, Aider, Copilot)**: Most use text search, embeddings, or file dumps for context retrieval. Aider uses a "repo map" from tree-sitter tags. No tool provides a persistent, queryable structural graph as a standalone artifact. The emerging consensus is that hybrid indexing (AST/code graph + vector search) is needed, but the structural half doesn't exist as a pluggable component.
+- **Stack Graphs (GitHub)** — Bidirectional resolution machines. Index both definitions and references. Find paths from reference nodes to definition nodes via symbol stack path-finding. Optimized for "go to definition" and "find all references." File-incremental, stored in SQLite. Language support requires complex `.tsg` rule files.
+- **ast-grep** — Structural pattern matching. No persistent index, no relational model. Finds where patterns occur. Doesn't explain what they depend on.
+- **Sourcegraph Cody** — AI assistant with code search backend. Structural knowledge implicit in the index, not exposed as a queryable artifact.
+- **Meta's Glean** — Structured fact store with declarative query language. Right shape but practically inaccessible in OSS.
+- **LSP** — Compiler-powered symbol resolution. Accurate, heavy, requires build configuration and language-specific servers.
+- **AI coding tools** — Most use text search, embeddings, or file dumps. No persistent structural graph. Emerging consensus that hybrid indexing (AST/code graph + vector search) is needed, but the structural half doesn't exist as a pluggable component.
 
 ### How symbex differs
 
-Scope graphs and stack graphs are **resolution machines** — their structure exists to answer "what does this name refer to?" They don't carry semantic metadata about what a declaration *is*. A stack graph definition node has a symbol name but no concept of `kind: "function"` vs `kind: "class"`.
+These tools answer "where is this symbol and who uses it?" — bidirectional, exhaustive, pre-indexed. symbex answers "where did this come from?" — forward-only, on-demand, scoped to what you're looking at.
 
-symbex is a **semantic relationship graph** — it captures what things are, what they contain, how they relate. The `defines` edge is a scope-to-binding relationship, but `extends`, `implements`, and `constrained` are semantic relationships that scope/stack graphs don't model. Resolution is one capability, not the sole purpose.
+Stack graphs index every reference and definition, then find paths between them. symbex indexes only declarations, extracts references on demand from source, and resolves them through scope walk. The graph is smaller, the resolution is cheaper, and the output is precise to one scope.
 
-Stack graphs are designed for one consumer (code navigation) with specific constraints (file-incremental, zero-config, sub-second queries at GitHub scale). ast-grep is designed for one-shot pattern matching with no persistent state. symbex exposes the graph itself as a queryable, persistent artifact that multiple consumers traverse on demand — AI agents, IDE navigators, and dependency analyzers use the same cursor over the same graph.
+ast-grep finds where things are. symbex explains what they depend on. They compose: ast-grep gives a location, symbex traces its provenance.
 
-No existing tool provides a general-purpose, language-agnostic scope graph with rich semantic metadata as a standalone on-demand navigation surface.
+No existing tool is optimized for forward provenance tracing as its primary operation.
 
-## Scope: What Phase 1 Is Not
+## Scope: What This Is Not
 
-- Not structural similarity matching across unrelated codebases
-- Not behavioral equivalence detection across languages
-- Not advanced semantic inference from code
-- Not natural-language-only querying (structural queries are the interface)
-- Not cross-file call graph resolution
-- Not anonymous function / callback / IIFE as first-class nodes
-- Not static method call disambiguation
-- Not call edge extraction (deferred — requires type resolution)
-- Not TypeScript namespace resolution (value vs type namespace — requires compiler-level knowledge)
-
-The initial question is narrower: can we extract, persist, traverse, and query a single-file scope graph reliably?
+- Not bidirectional reference resolution ("find all references")
+- Not compiler-level type analysis
+- Not a code search engine (composable with search tools instead)
+- Not cross-file call graph construction
+- Not anonymous function / IIFE tracking
+- Not a replacement for LSP
 
 ## Roadmap
 
-### Phase 1: The Scope Graph
+### Phase 1: Single-File Comprehension
 
-Build the single-file scope graph. Language plugin (raw extraction) → core index → query API. Definition graph with complete declaration coverage — every name introduced into every scope is captured faithfully. Plugin architecture settled with depth-gated query execution, bypass mechanism, and handler-per-tag structure.
+Build the scope graph and comprehension loop for a single file. Declaration extraction via capture/convert. Reference extraction via `getReferences`. Resolution via cursor scope walk. Parser returns `{ graph, tree }`.
 
-**Implemented:** imports (with `NodeSource` provenance and `external` flag), functions (including arrow/generator/expression forms), classes (including heritage, generics, abstract), methods, members, variables, destructuring patterns (recursive extraction of all bound names from object/array/rest patterns). GraphCursor for traversal and resolution. CLI with DOT output, JSON serialization, and `query` subcommand. D3 visualization for graph validation.
+**JavaScript is the primary language target** — TypeScript's surface area (dual namespaces, type-level constructs, ambient declarations) is too large for Phase 1. TypeScript can be added later as an incremental extension.
 
-**Remaining:** TypeScript type definitions (interfaces, type aliases, enums, namespaces), parameters as scope bindings, cursor test suite against synthetic graphs.
+**Implemented:** imports (with `NodeSource` provenance and `external` flag), functions (including arrow/generator/expression forms), classes (including heritage, generics, abstract), methods, members, variables, destructuring patterns (`flatPattern`). `GraphCursor` for traversal and resolution. Consolidated `bypassExport()`. CLI with DOT output, JSON serialization, and `query` subcommand.
 
-### Phase 2: Cross-File Resolution (On-Demand)
+**In progress:** `getReferences` (`flatExpression`) for JavaScript expression walking. `Parser.parse()` returning `{ graph, tree }`.
 
-Cross-file resolution is lazy — not a global graph merge. The same scope-walk mechanism from Phase 1 gains one new behavior: when resolution hits an import binding with a `NodeSource` in `at`, it follows the source path, loads the target file's graph, and continues resolution there.
+**Remaining:** Parameters as scope bindings. Pipeline integration tests (real file → parse → graph + tree → cursor → resolve → correct dependency set).
 
-Import resolution patterns for JS/TS:
+### Phase 2: Cross-File Comprehension
 
-- **Named import**: look up symbol by original name (or `alias_of`) from source graph root. One hop.
+Cross-file resolution is lazy. The same scope-walk mechanism gains one new behavior: when resolution hits an import binding with a `NodeSource` in `at`, it follows the source path, parses the target file on demand, loads its graph, and continues resolution there.
+
+Import resolution patterns for JS:
+
+- **Named import**: look up symbol by original name from source graph root. One hop.
 - **Namespace import**: member access `ns.foo` resolves `foo` from source graph root. Same as named.
-- **Default import**: look up whichever declaration the source file marks as default. The one pattern that needs the exporting side.
+- **Default import**: find the default-exported declaration in the source file.
 
-These three patterns collapse into two: look up a specific name from root (named + namespace), and find the default (default).
+These collapse into two patterns: look up a specific name from root (named + namespace), and find the default.
 
-Other languages are simpler:
+The consumer holds a `Map<filePath, { graph, tree }>` as a lazy cache. Each file loaded on demand contributes its pair. The parser stays stateless.
 
-- **Python**: `import foo` is namespace (access as `foo.bar`), `from foo import bar` is named. No default concept.
-- **Go**: everything is namespace import. Always `pkg.Symbol`. The simplest resolution model.
-- **Rust**: `use crate::module::Symbol` is path-walking through a module tree. No default. Visibility (`pub`) gates access.
-- **Java**: `import package.Class` is a single named symbol from a fully qualified path. The simplest of all.
-- **C/C++**: `#include` is text substitution, not symbol resolution. Fundamentally different model requiring a separate strategy.
+Other languages are simpler than JS — Python, Go, Rust, and Java all collapse into "look up a name from the module root" with no default export concept. C/C++ `#include` is text substitution, requiring a fundamentally different strategy.
 
-JS/TS is the hardest case. If cross-file resolution is solved for TypeScript, every other language is a subset.
+### Phase 3: Project-Wide Dependency Network
 
-Additional Phase 2 concerns: node identity across re-parses, persistent index format, variable nodes from imports upgraded to their real kinds once the source module is resolved.
+Each node's one-depth provenance trace connects to other nodes, whose traces connect to more. Accumulated across a project, this produces the full scope-level dependency network — not file-level imports, but how individual scopes relate through actual usage.
 
-### Phase 3: Native Structural Representation
+This network reveals architectural properties invisible from file trees:
 
-For the specific domain of code understanding, structural representation becomes first-class rather than reconstructed from text every time. ESLint-style local server architecture, rich abstraction plugin ecosystem. IDE-linked clustered graph navigator with progressive disclosure. Opt-in structural telemetry as potential training data for structure-native AI models.
+- **Clusters** of tightly coupled scopes are natural modules (regardless of file boundaries)
+- **High fan-in nodes** are critical shared infrastructure
+- **High fan-out nodes** are orchestrators
+- **Isolated subgraphs** are independent features
+- **A scope depending on 15 files** is a code smell
+- **Mutual dependency clusters** are extraction candidates
+
+The network doesn't require a separate analysis pass. It's the same one-depth comprehension loop run everywhere. Each trace is independent. Run lazily, cache results, and the network assembles itself incrementally as the codebase is explored.
+
+Additional Phase 3 concerns: ESLint-style local server architecture, persistent graph storage, IDE-linked clustered graph navigator with progressive disclosure, MCP server for AI agent integration.
 
 ## Validation
 
-TypeScript's `checker.ts` (the type checker implementation) serves as a stress test: ~54,000 lines, 6,624 nodes, 6,623 edges, dominated by a single ~52,700-line `createTypeChecker` function containing thousands of inner functions. symbex parses it in 2-3 seconds. If it handles `checker.ts` cleanly, most real-world TypeScript files are trivial by comparison.
+Real-world JavaScript files (lodash.js for IIFE/CommonJS, three.module.js for ESM) serve as end-to-end validation. The comprehension loop should: parse the file → build graph + tree → pick a function → run getReferences on its body → resolve each name → confirm each cursor lands on the correct declaration with correct provenance.
 
 ## Known Limitations
 
-### TypeScript Dual Namespace
+### JavaScript Plugin
 
-TypeScript has two namespaces: one for runtime values, one for types. A `class` declaration occupies both — it's a constructor value and a type. An `interface` occupies only the type namespace. A `const` occupies only the value namespace.
+- **Decorators**: Present in the AST but not captured or recorded in node props.
+- **Anonymous Functions and IIFEs**: No graph node — no name to bind.
+- **`getReferences` coverage**: Expression walking handles common cases. Unhandled expression types silently return `[]` — references are missed, not misattributed. Coverage expands incrementally as real files reveal gaps.
 
-This creates edge cases. `const X = class implements X {}` — the `const` only takes the value namespace, while the imported `X` interface still owns the type namespace. `implements X` resolves to the import, not to the class being declared. But `class X implements X {}` would take both namespaces, making `implements X` self-referential.
+### Architectural
 
-symbex cannot discriminate namespaces syntactically. Only `import type` and `import { type X }` are explicitly type-only; all other imports are ambiguous without resolving the export side. This is accepted as a Phase 1 limitation. Import bindings are provisional — `kind: "variable"` for non-type-stated imports, `kind: "type"` for explicitly typed ones. Phase 2 resolution can upgrade the kind when the source graph reveals what the declaration actually is.
+- **No "find all references"**: symbex traces forward (usage → origin), not backward (definition → all usages). This is by design — but means impact analysis requires scanning.
+- **Single-namespace path identity**: Two declarations with the same name in the same scope collide. Accepted unless real-world frequency justifies encoding namespace into paths.
 
-Additionally, when an import and a local declaration share the same name (one in each namespace), the path collision produces the same `NodeId`. The graph keeps whichever registers first. This is treated as shadowing — the shadowed name is unreachable in the graph, matching runtime semantics for the value namespace.
+## Future Considerations
 
-### Single-Namespace Path Identity
-
-The `HashRegistry` produces one `NodeId` per path. Two declarations with the same name in the same scope — even if in different TypeScript namespaces — collide. This is a structural limitation of using scope-chain paths as identity. Encoding namespace into the path (e.g., `["file.ts", "type::Foo"]`) would fix it but introduces a TypeScript-specific concept into the language-agnostic identity model. Deferred unless real-world frequency justifies the complexity.
-
-## Future Considerations (Not Phase 1)
-
-Recorded for later exploration:
-
-- **ESLint-style local server architecture**: Persistent local server (`tool serve`) that owns the AST index, watches the filesystem, handles incremental re-parsing, and exposes a query API via HTTP or IPC.
-- **Structural hashing**: Hash AST subtrees for O(1) structural matching. Hash-based change notification for consumers (hash as receipt, mismatch triggers re-fetch).
-- **Pattern tags**: Structural properties attached to nodes, surfacing what code *does* rather than what it *says*.
-- **Rich abstraction plugin ecosystem**: Domain-specific lenses — React component tree abstraction, NestJS decorator-aware abstraction, etc.
-- **File-incremental graph construction**: Following stack graphs' approach — each file's subgraph constructed in isolation, merged at query time. Enables persistent storage and incremental updates.
-- **MCP server**: Expose the graph as a Model Context Protocol server, allowing AI agents to query structural context on demand through the standard tool-use interface.
-- **IDE-linked clustered graph navigator**: Visual graph with progressive disclosure. Clustered by file, expandable to declarations, with ctrl-click jump-to-definition powered by `resolve()`.
+- **MCP server**: Expose the comprehension loop as a Model Context Protocol server for AI agent integration.
+- **IDE-linked clustered graph navigator**: Visual graph with progressive disclosure — clustered by file, expandable to declarations, ctrl-click jump-to-definition via `resolve()`.
+- **Structural hashing**: Hash AST subtrees for O(1) structural matching and change detection.
+- **Abstraction plugins**: Domain-specific lenses (React component tree, NestJS decorator-aware) over the same raw graph.
+- **TypeScript extension**: Add type-level constructs (interfaces, type aliases, enums, namespaces) as an incremental layer on top of the JavaScript plugin.
 
 ## Open Questions
 
-- What's the right persistent format for the scope graph? JSON is simple but may not be optimal for search performance at scale. Stack graphs use SQLite. FlatBuffers is another option.
-- Whether hybrid approaches (scope graph for structural queries + text search for intent/semantic queries) outperform pure structural search
-- Benchmarking: how to measure precision/noise reduction against text-based retrieval
-- How to handle TypeScript's type-level constructs (interfaces, type aliases, conditional types) — these introduce names but don't produce runtime scopes. Do they get `kind: "type"` with a scope role, or are they pure bindings?
-- How to handle C/C++ `#include` — text substitution rather than symbol import. May require a fundamentally different strategy from the scope-walk model.
-- Whether the query layer emerges naturally from cursor usage patterns or needs explicit upfront design.
+- Persistent format for the scope graph — JSON, SQLite, FlatBuffers.
+- Whether hybrid approaches (scope graph + vector search) outperform either alone for AI context retrieval.
+- How to handle C/C++ `#include` — text substitution rather than symbol import.
+- Whether the project-wide dependency network should be pre-computed or always assembled on demand.

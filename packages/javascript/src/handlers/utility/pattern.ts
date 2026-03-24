@@ -1,11 +1,6 @@
 import type TSParser from "tree-sitter";
 
-type Pattern = (
-  node: TSParser.SyntaxNode,
-  has_default?: boolean,
-) => { name: string; node: TSParser.SyntaxNode; has_default?: boolean }[];
-
-const patterns: Record<string, Pattern> = {
+const patterns: Record<string, typeof flatPattern> = {
   identifier: (node, has_default) => [{ name: node.text, node, has_default }],
   shorthand_property_identifier_pattern: (node, has_default) => [
     { name: node.text, node, has_default },
@@ -26,8 +21,11 @@ const patterns: Record<string, Pattern> = {
     node.namedChildren.flatMap((c) => flatPattern(c, has_default)),
 };
 
-const flatPattern: Pattern = (node, has_default = false) => {
+function flatPattern(
+  node: TSParser.SyntaxNode,
+  has_default: boolean = false,
+): { name: string; node: TSParser.SyntaxNode; has_default?: boolean }[] {
   return patterns[node.type]?.(node, has_default) ?? [];
-};
+}
 
 export default flatPattern;

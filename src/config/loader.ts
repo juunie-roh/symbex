@@ -10,8 +10,8 @@ import ConfigError from "./error";
  * @param configPath The configuration file path to check.
  * @throws If `configPath` is not a non-empty string.
  */
-function assertConfigPath(configPath: string): void {
-  if (!configPath) {
+function assertConfigPath(configPath: unknown): asserts configPath is string {
+  if (!configPath || typeof configPath !== "string" || configPath.length <= 0) {
     throw new ConfigError(
       "CONFIG_INVALID_PATH",
       "'configPath' must be a non-empty string",
@@ -19,13 +19,9 @@ function assertConfigPath(configPath: string): void {
   }
 }
 
-function resolveConfigPath(configPath: string): string {
+function loadConfig(configPath: unknown): Config {
   assertConfigPath(configPath);
-  return path.resolve(cwd(), configPath);
-}
-
-function loadConfig(configPath: string): Config {
-  const resolved = resolveConfigPath(configPath);
+  const resolved = path.resolve(cwd(), configPath);
   try {
     return require(resolved);
   } catch (e) {

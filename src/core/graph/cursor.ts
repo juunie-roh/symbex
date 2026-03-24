@@ -1,3 +1,5 @@
+import type Parser from "tree-sitter";
+
 import type { NodeId, NodePath } from "@/models";
 import { defined } from "@/shared/defined";
 
@@ -16,28 +18,21 @@ class GraphCursor {
     this._id = id;
   }
 
-  // IDE sync entry point
-  static atPosition(graph: Graph, offset: number): GraphCursor | undefined {
-    let deepestId: NodeId | undefined;
-    let deepestDepth = -1;
+  /**
+   * Get graph cursor instance at given {@link Parser.Point | point} or byte offset.
+   */
+  static at(graph: Graph, target: Parser.Point | number): GraphCursor {
+    let cursor = graph.walk();
+    let next: GraphCursor | undefined;
 
-    for (const [id, node] of graph.nodes) {
-      if ("name" in node.at) continue;
-      const { startIndex, endIndex } = node.at;
-      if (offset < startIndex || offset > endIndex) continue;
-
-      // path length is scope depth — longer path = deeper node
-      const depth = graph.depth(id);
-      if (depth > deepestDepth) {
-        deepestDepth = depth;
-        deepestId = id;
-      }
+    while ((next = cursor.children().find(GraphCursor._contains(target)))) {
+      cursor = next;
     }
 
-    return deepestId ? new GraphCursor(graph, deepestId) : undefined;
+    return cursor;
   }
 
-  get node() {
+  get node(): Graph.Node {
     const n = this._graph.nodes.get(this._id);
     defined(
       n,
@@ -96,6 +91,24 @@ class GraphCursor {
     );
     // scope is the parent — you probably want the child
     return scope?.children().find((child) => child.name === symbol);
+  }
+
+  private static _contains(target: Parser.Point | number) {
+    return (child: GraphCursor) => {
+      if ("name" in child.node.at) return false;
+      if (typeof target === "number") {
+        const { startIndex, endIndex } = child.node.at;
+        return startIndex <= target && endIndex >= target;
+      }
+
+      const { startPosition, endPosition } = child.node.at;
+      return (
+        startPosition.row <= target.row &&
+        startPosition.column <= target.column &&
+        endPosition.row >= target.row &&
+        endPosition.column >= target.column
+      );
+    };
   }
 }
 

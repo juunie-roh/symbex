@@ -1,5 +1,5 @@
 import type { CaptureConfigOptions } from "symbex";
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import { bypass, query } from "@/query";
 import { QueryConfig } from "@/types";
@@ -8,7 +8,7 @@ function bypassExport(
   queryKey: keyof QueryConfig,
 ): CaptureConfigOptions["bypass"] {
   return (node) => {
-    const matches: TSParser.QueryMatch[] = [];
+    const matches: Parser.QueryMatch[] = [];
 
     if (node.type === "program") {
       const captured = bypass

@@ -1,4 +1,4 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 const patterns: Record<string, typeof flatPattern> = {
   identifier: (node, has_default) => [{ name: node.text, node, has_default }],
@@ -22,9 +22,9 @@ const patterns: Record<string, typeof flatPattern> = {
 };
 
 function flatPattern(
-  node: TSParser.SyntaxNode,
+  node: Parser.SyntaxNode,
   has_default: boolean = false,
-): { name: string; node: TSParser.SyntaxNode; has_default?: boolean }[] {
+): { name: string; node: Parser.SyntaxNode; has_default?: boolean }[] {
   return patterns[node.type]?.(node, has_default) ?? [];
 }
 

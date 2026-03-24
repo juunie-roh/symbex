@@ -1,4 +1,4 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import flatPattern from "./pattern";
 
@@ -95,7 +95,7 @@ const dispatcher: Record<string, typeof flatExpression> = {
   },
 };
 
-function flatExpression(node: TSParser.SyntaxNode): string[] {
+function flatExpression(node: Parser.SyntaxNode): string[] {
   return dispatcher[node.type]?.(node) ?? [];
 }
 

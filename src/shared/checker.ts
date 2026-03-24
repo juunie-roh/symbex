@@ -1,6 +1,6 @@
-import TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
-import { PluginDescriptor } from "@/models";
+import type { PluginDescriptor } from "@/models";
 
 import { SymbexError } from "./error";
 
@@ -9,7 +9,7 @@ import { SymbexError } from "./error";
  */
 export function isTreeSitterLanguage(
   target: unknown,
-): target is TSParser.Language {
+): target is Parser.Language {
   return (
     typeof target === "object" &&
     target !== null &&
@@ -24,7 +24,7 @@ export function isTreeSitterLanguage(
  */
 export function isTreeSitterLanguageRecord(
   target: unknown,
-): target is Record<string, TSParser.Language> {
+): target is Record<string, Parser.Language> {
   return (
     typeof target === "object" &&
     target !== null &&
@@ -34,13 +34,13 @@ export function isTreeSitterLanguageRecord(
 }
 
 /**
- * Coerces the target to satisfy {@link TSParser.Language}.
+ * Coerces the target to satisfy {@link Parser.Language}.
  */
 export function assertTreeSitterLanguage(
   target: unknown,
   name: string,
   error: SymbexError,
-): asserts target is TSParser.Language {
+): asserts target is Parser.Language {
   if (!isTreeSitterLanguage(target)) {
     if (isTreeSitterLanguageRecord(target)) {
       // if a module exports the record of languages, output help message

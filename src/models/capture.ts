@@ -1,9 +1,9 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import type { QueryConfig } from "./global";
 
 type CaptureConfigOptions = {
-  bypass?: (node: TSParser.SyntaxNode) => TSParser.QueryMatch[];
+  bypass?: (node: Parser.SyntaxNode) => Parser.QueryMatch[];
   maxStartDepth?: number;
 };
 
@@ -12,9 +12,9 @@ type CaptureConfig<Q extends QueryConfig> = {
 };
 
 type SingleCaptureResult<T extends QueryConfig[string]> = {
-  [K in T["required"]]: TSParser.SyntaxNode;
+  [K in T["required"]]: Parser.SyntaxNode;
 } & {
-  [K in T["optional"]]?: TSParser.SyntaxNode;
+  [K in T["optional"]]?: Parser.SyntaxNode;
 };
 
 type FullCaptureResult<Q extends QueryConfig> = {

@@ -101,7 +101,7 @@ Each language lives in `packages/<lang>/` as a separate workspace package, loade
 
 ```ts
 type PluginDescriptor = {
-  language: TSParser.Language;       // tree-sitter language binding
+  language: Parser.Language;       // tree-sitter language binding
   query: QueryMap;                   // compiled queries map
   captureConfig: CaptureConfig;      // capture configuration with bypass
   convertConfig: ConvertConfig;      // handler registry

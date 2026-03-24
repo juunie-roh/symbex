@@ -1,4 +1,4 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import type { QueryMap } from "@/utils/query";
 
@@ -29,9 +29,9 @@ type BaseNode<K extends string = string> = {
   kind: K;
   /**
    * A position where does the node sit in the file. If the node is from outside the file, {@link NodeSource | source}.
-   * @see {@link TSParser.Range | tree-sitter `Range`}
+   * @see {@link Parser.Range | tree-sitter `Range`}
    */
-  at: TSParser.Range | NodeSource;
+  at: Parser.Range | NodeSource;
   /**
    * Language-specific property supplements.
    */
@@ -76,7 +76,7 @@ export type Node<K extends string = string> = ScopeNode<K> | BindingNode<K>;
  * import type * as symbex from "symbex";
  * type Edge = symbex.Edge<"edge kind" | "string literals">;
  */
-export interface Edge<K extends string = string> {
+export type Edge<K extends string = string> = {
   /**
    * ID of the source node where the relationship originates.
    */
@@ -93,7 +93,7 @@ export interface Edge<K extends string = string> {
    * Language-specific property supplements.
    */
   props?: Record<string, unknown>;
-}
+};
 
 export type QueryConfig = Record<
   string,
@@ -105,9 +105,9 @@ export interface PluginDescriptor<
   N extends Node = Node,
   E extends Edge = Edge,
 > {
-  language: TSParser.Language;
+  language: Parser.Language;
   query: QueryMap<keyof Q & string>;
   captureConfig: CaptureConfig<Q>;
   convertConfig: ConvertConfig<Q, N, E>;
-  references: (node: TSParser.SyntaxNode) => string[];
+  references: (node: Parser.SyntaxNode) => string[];
 }

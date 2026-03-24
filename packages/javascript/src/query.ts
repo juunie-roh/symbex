@@ -1,5 +1,5 @@
 import { QueryMap } from "symbex/query";
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 import JavaScript from "tree-sitter-javascript";
 
 // anonymous
@@ -19,7 +19,7 @@ import methodQueryString from "@/queries/scope/method.scm";
 // utility
 import { BypassQueryKey, QueryConfig } from "./types";
 
-export const language = JavaScript as TSParser.Language;
+export const language = JavaScript as Parser.Language;
 
 export const query = new QueryMap<keyof QueryConfig>(language)
   // anonymous

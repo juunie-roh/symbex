@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { createCommand } from "@commander-js/extra-typings";
-import TSParser from "tree-sitter";
+import Parser from "tree-sitter";
 
 import { assertTreeSitterLanguage } from "@/shared/checker";
 
@@ -55,7 +55,7 @@ const queryCommand = createCommand("query")
       new BinaryError("BIN_INVALID_LANGUAGE", "Invalid tree-sitter language"),
     );
 
-    const parser = new TSParser();
+    const parser = new Parser();
     parser.setLanguage(language);
     const source = readFileSync(filePath, options.encoding);
     const tree = parser.parse(source);
@@ -71,7 +71,7 @@ const queryCommand = createCommand("query")
       ? readFileSync(options.query)
       : options.queryString;
 
-    const query = new TSParser.Query(language, querySource!);
+    const query = new Parser.Query(language, querySource!);
 
     const matches = query.matches(tree.rootNode, {
       maxStartDepth: options.maxStartDepth,

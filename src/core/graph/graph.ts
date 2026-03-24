@@ -1,34 +1,36 @@
-import type { Edge, Node, NodeId, NodePath } from "@/models";
+import type { Edge as E, Node as N, NodeId, NodePath } from "@/models";
 import { defined } from "@/shared/defined";
 
 import GraphCursor from "./cursor";
 import GraphError from "./error";
 import { HashRegistry } from "./hash-registry";
 
-type GraphNode = Exclude<Node, "path"> & {
-  id: NodeId;
-  /**
-   * Last element of path segments representing the node.
-   */
-  name: string;
-};
+namespace Graph {
+  export type Node = Exclude<N, "path"> & {
+    id: NodeId;
+    /**
+     * Last element of path segments representing the node.
+     */
+    name: string;
+  };
 
-type GraphEdge = Pick<Edge, "kind"> & {
-  from: NodeId;
-  to: NodeId;
-};
+  export type Edge = Pick<E, "kind"> & {
+    from: NodeId;
+    to: NodeId;
+  };
+}
 
 class Graph {
   private _registry: HashRegistry;
-  private _nodes: Map<NodeId, GraphNode>;
-  private _edges: Map<NodeId, Map<NodeId, Set<GraphEdge["kind"]>>>;
+  private _nodes: Map<NodeId, Graph.Node>;
+  private _edges: Map<NodeId, Map<NodeId, Set<Graph.Edge["kind"]>>>;
   private _edgeProps: Map<
     NodeId,
-    Map<NodeId, Map<GraphEdge["kind"], Edge["props"]>>
+    Map<NodeId, Map<Graph.Edge["kind"], E["props"]>>
   >;
   private _root: NodeId | undefined;
 
-  constructor(nodes: Node[], edges: Edge[]) {
+  constructor(nodes: N[], edges: E[]) {
     this._registry = new HashRegistry();
     this._nodes = new Map();
     this._edges = new Map();
@@ -46,7 +48,7 @@ class Graph {
   /**
    * @returns All the nodes added to the graph.
    */
-  get nodes(): ReadonlyMap<NodeId, GraphNode> {
+  get nodes(): ReadonlyMap<NodeId, Graph.Node> {
     return this._nodes;
   }
   /**
@@ -54,7 +56,7 @@ class Graph {
    */
   get edges(): ReadonlyMap<
     NodeId,
-    ReadonlyMap<NodeId, ReadonlySet<GraphEdge["kind"]>>
+    ReadonlyMap<NodeId, ReadonlySet<Graph.Edge["kind"]>>
   > {
     return this._edges;
   }
@@ -63,7 +65,7 @@ class Graph {
    */
   get edgeProps(): ReadonlyMap<
     NodeId,
-    ReadonlyMap<NodeId, ReadonlyMap<GraphEdge["kind"], Edge["props"]>>
+    ReadonlyMap<NodeId, ReadonlyMap<Graph.Edge["kind"], E["props"]>>
   > {
     return this._edgeProps;
   }
@@ -72,7 +74,7 @@ class Graph {
    * Adds a node to the graph.
    * @returns `this` for chaining.
    */
-  addNode(node: Node): this {
+  addNode(node: N): this {
     const { path } = node;
     const id = this._registry.encode(path);
     if (path.length === 1) this._root = id;
@@ -96,7 +98,7 @@ class Graph {
    * Removes a node from the graph.
    * @returns `this` for chaining.
    */
-  removeNode(node: Node): this {
+  removeNode(node: N): this {
     const id = this._registry.encode(node.path);
     this._edges.delete(id);
     this._nodes.delete(id);
@@ -118,15 +120,15 @@ class Graph {
    */
   adjacent(
     id: NodeId,
-  ): ReadonlyMap<NodeId, ReadonlySet<GraphEdge["kind"]>> | undefined {
+  ): ReadonlyMap<NodeId, ReadonlySet<Graph.Edge["kind"]>> | undefined {
     return this._edges.get(id);
   }
 
   getEdgeProperties(
     from: NodeId,
     to: NodeId,
-    kind: GraphEdge["kind"],
-  ): Edge["props"] {
+    kind: Graph.Edge["kind"],
+  ): E["props"] {
     return this._edgeProps.get(from)?.get(to)?.get(kind);
   }
 
@@ -134,7 +136,7 @@ class Graph {
    * Adds an edge to the graph.
    * @returns `this` for chaining.
    */
-  addEdge(edge: Edge): this {
+  addEdge(edge: E): this {
     const { from, to, kind, props } = edge;
     const fromId = this._registry.encode(from);
     const toId = this._registry.encode(to);
@@ -171,7 +173,7 @@ class Graph {
   /**
    * @returns `this` for chaining.
    */
-  removeEdge(from: NodeId, to: NodeId, kind: GraphEdge["kind"]): this {
+  removeEdge(from: NodeId, to: NodeId, kind: Graph.Edge["kind"]): this {
     this._edges.get(from)?.get(to)?.delete(kind);
     this._edgeProps.get(from)?.get(to)?.delete(kind);
     return this;
@@ -180,7 +182,7 @@ class Graph {
   /**
    * @returns True if there is an edge from the `source` node to `target` node.
    */
-  hasEdge(from: NodeId, to: NodeId, kind: GraphEdge["kind"]): boolean {
+  hasEdge(from: NodeId, to: NodeId, kind: Graph.Edge["kind"]): boolean {
     return this._edges.get(from)?.get(to)?.has(kind) ?? false;
   }
 
@@ -263,7 +265,7 @@ class Graph {
 
   private _adjacent(
     id: NodeId,
-  ): Map<NodeId, Set<GraphEdge["kind"]>> | undefined {
+  ): Map<NodeId, Set<Graph.Edge["kind"]>> | undefined {
     return this._edges.get(id);
   }
 
@@ -273,8 +275,8 @@ class Graph {
   private _setEdgeProperties(
     from: NodeId,
     to: NodeId,
-    kind: GraphEdge["kind"],
-    props: Edge["props"],
+    kind: Graph.Edge["kind"],
+    props: E["props"],
   ): this {
     if (!this._edgeProps.has(from)) {
       this._edgeProps.set(from, new Map());

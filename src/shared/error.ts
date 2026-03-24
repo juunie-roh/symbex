@@ -22,7 +22,9 @@ export type SymbexErrorCode =
   | "GRAPH_UNREGISTERED_NODE"
   // query
   | "QUERY_SET_DUPLICATE_KEY"
-  | "QUERY_GET_INVALID_KEY";
+  | "QUERY_GET_INVALID_KEY"
+  // workspace
+  | "WORKSPACE_FILE_NOT_PARSED";
 
 export class SymbexError extends Error {
   readonly code: SymbexErrorCode;

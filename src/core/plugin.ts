@@ -1,4 +1,4 @@
-import TSParser from "tree-sitter";
+import Parser from "tree-sitter";
 
 import type {
   Edge,
@@ -16,7 +16,7 @@ import CoreError from "./error";
  * Represents a loaded and initialized symbex language plugin.
  */
 class Plugin {
-  private _parser: TSParser;
+  private _parser: Parser;
 
   private _module: PluginDescriptor;
 
@@ -37,7 +37,7 @@ class Plugin {
       this._module.convertConfig,
     );
 
-    this._parser = new TSParser();
+    this._parser = new Parser();
     this._parser.setLanguage(this._module.language);
   }
 
@@ -74,14 +74,14 @@ class Plugin {
   }
 
   /**
-   * The {@link TSParser.Language | tree-sitter `Language`} instance used by this plugin.
+   * The {@link Parser.Language | tree-sitter `Language`} instance used by this plugin.
    */
   get language() {
     return this._parser.getLanguage();
   }
 
   /**
-   * Parses a source file to the {@link TSParser.Tree | tree-sitter `Tree`}.
+   * Parses a source file to the {@link Parser.Tree | tree-sitter `Tree`}.
    * @param filePath Path to the source file to parse.
    * @param source String source to parse.
    * @param oldTree Previous tree for incremental parsing.
@@ -91,9 +91,9 @@ class Plugin {
   parse(
     filePath: string,
     source: string,
-    oldTree?: TSParser.Tree | null,
-    options?: TSParser.Options,
-  ): TSParser.Tree {
+    oldTree?: Parser.Tree | null,
+    options?: Parser.Options,
+  ): Parser.Tree {
     try {
       return this._parser.parse(source, oldTree, options);
     } catch (e) {
@@ -105,13 +105,13 @@ class Plugin {
     }
   }
 
-  references(node: TSParser.SyntaxNode): string[] {
+  references(node: Parser.SyntaxNode): string[] {
     return this._module.references(node);
   }
 
   extract(
     filePath: string,
-    node: TSParser.SyntaxNode,
+    node: Parser.SyntaxNode,
   ): { edges: Edge[]; nodes: Node[] } {
     const captures = this._capture(node);
     const result = this._convert(captures, [filePath] as NodePath);

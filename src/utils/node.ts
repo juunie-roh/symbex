@@ -1,12 +1,12 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
-export function getRange(node: TSParser.SyntaxNode): TSParser.Range {
+export function getRange(node: Parser.SyntaxNode): Parser.Range {
   return {
     startIndex: node.startIndex,
     endIndex: node.endIndex,
     startPosition: node.startPosition,
     endPosition: node.endPosition,
-  } satisfies TSParser.Range;
+  } satisfies Parser.Range;
 }
 
 /**
@@ -16,8 +16,8 @@ export function getRange(node: TSParser.SyntaxNode): TSParser.Range {
  */
 export function getInnerMostParent(
   type: string,
-  node: TSParser.SyntaxNode,
-): TSParser.SyntaxNode | undefined {
+  node: Parser.SyntaxNode,
+): Parser.SyntaxNode | undefined {
   let cur = node.parent;
 
   while (cur) {

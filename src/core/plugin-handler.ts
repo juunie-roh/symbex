@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import type { Config } from "@/models/config";
 import { defined } from "@/shared/defined";
@@ -9,6 +9,14 @@ import CoreError from "./error";
 import Graph from "./graph";
 import GraphCursor from "./graph/cursor";
 import Plugin from "./plugin";
+
+namespace PluginHandler {
+  export type ParseResult = {
+    graph: Graph;
+    tree: Parser.Tree;
+    language: string;
+  };
+}
 
 class PluginHandler {
   private _languagePlugins: Map<string, Plugin>;
@@ -43,13 +51,9 @@ class PluginHandler {
   parse(
     filePath: string,
     source: string,
-    oldTree?: TSParser.Tree | null,
-    options?: TSParser.Options,
-  ): {
-    graph: Graph;
-    tree: TSParser.Tree;
-    name: string;
-  } {
+    oldTree?: Parser.Tree | null,
+    options?: Parser.Options,
+  ): PluginHandler.ParseResult {
     const plugin = this._getPlugin(filePath);
     const tree = plugin.parse(filePath, source, oldTree, options);
 
@@ -62,7 +66,7 @@ class PluginHandler {
     return {
       graph: new Graph(nodes, edges),
       tree,
-      name: this._inverted.get(plugin)!,
+      language: this._inverted.get(plugin)!,
     };
   }
 
@@ -72,7 +76,7 @@ class PluginHandler {
    * @param pluginName A name of the plugin.
    */
   references(
-    tree: TSParser.Tree,
+    tree: Parser.Tree,
     cursor: GraphCursor,
     pluginName: string,
   ): string[] {
@@ -84,25 +88,28 @@ class PluginHandler {
       );
     defined(plugin);
 
-    let startIndex: number;
+    let offset: number;
 
     const cursorNode = cursor.node;
 
     if (cursorNode.type !== "binding") {
-      startIndex = cursorNode.blockStartIndex;
+      // for scope node, set start index as its block start index
+      offset = cursorNode.blockStartIndex;
     } else if ("name" in cursorNode.at) {
-      startIndex = 0;
+      // if the node is an imported module, start at root
+      offset = 0;
     } else {
-      startIndex = cursorNode.at.startIndex;
+      // neither, then set start index at the node's.
+      offset = cursorNode.at.startIndex;
     }
-    // Get root level cursor for the tree
-    const treeCursor = tree.walk();
-    // Move the tree cursor to the target position
-    treeCursor.gotoFirstChildForIndex(startIndex);
-    // The tree cursor doesn't have direct API to return the very node at index,
-    // so manually call the parent node.
-    const node: TSParser.SyntaxNode | null = treeCursor.currentNode.parent;
-    return node ? plugin.references(node) : [];
+
+    // const treeCursor = tree.walk();
+    // treeCursor.gotoFirstChildForIndex(offset);
+    const node =
+      tree.rootNode.descendantForIndex(offset).parent ?? tree.rootNode;
+
+    // const node: Parser.SyntaxNode = treeCursor.currentNode;
+    return plugin.references(node);
   }
 
   /**

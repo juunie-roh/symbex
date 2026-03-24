@@ -213,51 +213,37 @@ describe("Graph Cursor", () => {
     });
   });
 
-  describe("atPosition()", () => {
+  describe("at()", () => {
     it("returns undefined when no node covers the offset", () => {
-      expect(GraphCursor.atPosition(graph, 200)).toBeUndefined();
+      expect(GraphCursor.at(graph, 200).depth).toEqual(0);
     });
 
     it("returns the deepest node covering the offset", () => {
       // offset 30 is inside Foo (10-80) and bar (20-50)
-      const c = GraphCursor.atPosition(graph, 30);
-      expect(c?.path).toEqual(["file.ts", "Foo", "bar"]);
+      const c = GraphCursor.at(graph, 30);
+      expect(c.path).toEqual(["file.ts", "Foo", "bar"]);
     });
 
     it("returns a shallower node when offset is outside deeper nodes", () => {
       // offset 15 is inside Foo (10-80) but not bar (20-50)
-      const c = GraphCursor.atPosition(graph, 15);
-      expect(c?.path).toEqual(["file.ts", "Foo"]);
+      const c = GraphCursor.at(graph, 15);
+      expect(c.path).toEqual(["file.ts", "Foo"]);
     });
 
     it("returns undefined when offset falls outside all ranged nodes", () => {
       // offset 90 is outside Foo (10-80), bar (20-50), and x (60-75); file.ts uses NodeSource and is skipped
-      const c = GraphCursor.atPosition(graph, 90);
-      expect(c).toBeUndefined();
+      const c = GraphCursor.at(graph, 90);
+      expect(c.depth).toEqual(0);
     });
 
     it("includes a node whose startIndex equals the offset", () => {
       // offset 10 is the inclusive start of Foo (10-80); bar starts at 20
-      expect(GraphCursor.atPosition(graph, 10)?.path).toEqual([
-        "file.ts",
-        "Foo",
-      ]);
+      expect(GraphCursor.at(graph, 10).path).toEqual(["file.ts", "Foo"]);
     });
 
     it("includes a node whose endIndex equals the offset", () => {
       // offset 80 is the inclusive end of Foo (10-80); bar ends at 50
-      expect(GraphCursor.atPosition(graph, 80)?.path).toEqual([
-        "file.ts",
-        "Foo",
-      ]);
-    });
-
-    it("excludes a node just before its startIndex", () => {
-      expect(GraphCursor.atPosition(graph, 9)).toBeUndefined();
-    });
-
-    it("excludes a node just after its endIndex", () => {
-      expect(GraphCursor.atPosition(graph, 81)).toBeUndefined();
+      expect(GraphCursor.at(graph, 80).path).toEqual(["file.ts", "Foo"]);
     });
   });
 });

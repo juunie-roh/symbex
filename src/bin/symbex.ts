@@ -4,12 +4,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { createCommand } from "@commander-js/extra-typings";
-import type { Tree } from "tree-sitter";
 
 import { loadConfig } from "@/config";
-import { Graph, PluginHandler } from "@/core";
 import { printDotGraph } from "@/dot";
 import { SymbexError } from "@/shared/error";
+import { Workspace } from "@/workspace";
 
 import pkg from "../../package.json";
 import { fileArg, othersArg } from "./args";
@@ -32,38 +31,20 @@ const program = createCommand()
   .addOption(verboseOption)
   .option("-d, --dot [name]", "print the graph in DOT format", false)
   .option("-o, --output <output>", "output file name", false)
-  .option("-r, --references", "temp", false)
+  .option("--trace", "temp", false)
   .commandsGroup(group.command.dev)
   .addCommand(queryCommand)
   .action((file, others, options) => {
-    const config = loadConfig(options.config);
-    const handler = new PluginHandler(config);
-    const { graph, tree, name } = handler.parse(
+    const workspace = new Workspace(loadConfig(options.config));
+    const { graph } = workspace.open(
       file,
       readFileSync(file, options.encoding),
     );
 
-    const map = new Map<Graph, Tree>();
-    map.set(graph, tree);
-
     let data: any = graph.serialize();
 
-    if (options.references) {
-      const graphCursor = graph.walk();
-      const names = handler.references(tree, graphCursor, name);
-      console.log(names);
-      for (const name of names) {
-        const resolved = graphCursor.resolve(name);
-        if (resolved) {
-          console.log(
-            resolved.path.join(" > "),
-            "at:",
-            "name" in resolved.node.at
-              ? `${resolved.node.at.name}(${resolved.node.at.external ?? false})`
-              : resolved.node.at.startIndex,
-          );
-        }
-      }
+    if (options.trace) {
+      workspace.trace(file, { row: 69, column: 1 });
     }
 
     if (options.dot) {

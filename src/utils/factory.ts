@@ -1,4 +1,4 @@
-import type TSParser from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import type {
   CaptureConfig,
@@ -64,7 +64,7 @@ export function createCapture<Q extends QueryConfig>(
    * Converts a single query match into a raw capture object.
    */
   function toCapture<K extends keyof Q>(
-    match: TSParser.QueryMatch,
+    match: Parser.QueryMatch,
   ): SingleCaptureResult<Q[K]> {
     return Object.fromEntries(
       match.captures.map((c) => [c.name, c.node]),
@@ -74,17 +74,17 @@ export function createCapture<Q extends QueryConfig>(
   /**
    * Captures all registered query tags against a node.
    */
-  function capture(node: TSParser.SyntaxNode): FullCaptureResult<Q>;
+  function capture(node: Parser.SyntaxNode): FullCaptureResult<Q>;
   /**
    * Captures all matches for a single query tag.
    */
   function capture<K extends keyof Q>(
-    node: TSParser.SyntaxNode,
+    node: Parser.SyntaxNode,
     tag: K,
   ): SingleCaptureResult<Q[K]>[];
 
   function capture<K extends keyof Q>(
-    node: TSParser.SyntaxNode,
+    node: Parser.SyntaxNode,
     tag?: K,
   ): FullCaptureResult<Q> | SingleCaptureResult<Q[K]>[] {
     if (!tag) {

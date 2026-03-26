@@ -30,7 +30,7 @@ declare namespace Plugin {
 }
 
 /**
- * Represents a loaded and initialized etant language plugin.
+ * Represents a loaded and initialized letant language plugin.
  */
 class Plugin {
   private _parser: Parser;

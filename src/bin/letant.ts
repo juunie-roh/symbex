@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { createCommand } from "@commander-js/extra-typings";
 
-import { EtantError } from "@/common/error";
+import { LetantError } from "@/common/error";
 import { loadConfig } from "@/config";
 import { printDotGraph } from "@/dot";
 import { Workspace } from "@/workspace";
@@ -74,7 +74,7 @@ try {
   program.parse();
 } catch (e) {
   const verbose = program.opts().verbose;
-  if (e instanceof EtantError) {
+  if (e instanceof LetantError) {
     process.stderr.write(`${badge(e.code, "41")} ${e.message}\n`);
     if (verbose) console.error(e);
   } else {

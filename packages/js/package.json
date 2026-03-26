@@ -1,7 +1,7 @@
 {
-  "name": "@etant/js",
+  "name": "@letant/js",
   "version": "0.0.0",
-  "description": "JavaScript plugin for etant",
+  "description": "JavaScript plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
-    "dev:query": "pnpm etant query --grammar tree-sitter-javascript"
+    "dev:query": "pnpm letant query --grammar tree-sitter-javascript"
   },
   "keywords": [],
   "author": "Juun",
@@ -32,11 +32,11 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "etant": "^0.0.0",
+    "letant": "^0.0.0",
     "tree-sitter-javascript": "^0.25.0"
   },
   "devDependencies": {
-    "etant": "workspace:*",
+    "letant": "workspace:*",
     "tree-sitter-javascript": "^0.25.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"

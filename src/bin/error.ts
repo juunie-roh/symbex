@@ -1,8 +1,8 @@
-import { EtantError, EtantErrorCode } from "@/common/error";
+import { LetantError, LetantErrorCode } from "@/common/error";
 
-type BinaryErrorCode = Extract<EtantErrorCode, `BIN_${string}`>;
+type BinaryErrorCode = Extract<LetantErrorCode, `BIN_${string}`>;
 
-class BinaryError extends EtantError {
+class BinaryError extends LetantError {
   constructor(code: BinaryErrorCode, message: string, options?: ErrorOptions) {
     super(code, message, options);
   }

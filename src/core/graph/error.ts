@@ -1,8 +1,8 @@
-import { EtantError, EtantErrorCode } from "@/common/error";
+import { LetantError, LetantErrorCode } from "@/common/error";
 
-type GraphErrorCode = Extract<EtantErrorCode, `GRAPH_${string}`>;
+type GraphErrorCode = Extract<LetantErrorCode, `GRAPH_${string}`>;
 
-class GraphError extends EtantError {
+class GraphError extends LetantError {
   constructor(code: GraphErrorCode, message: string, options?: ErrorOptions) {
     super(code, message, options);
   }

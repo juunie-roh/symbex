@@ -2,7 +2,7 @@ import type Parser from "tree-sitter";
 
 import type { Plugin } from "@/core";
 
-import { EtantError } from "./error";
+import { LetantError } from "./error";
 
 /**
  *  Validates whether the target is tree-sitter language module.
@@ -39,7 +39,7 @@ export function isTreeSitterLanguageRecord(
 export function assertTreeSitterLanguage(
   target: unknown,
   name: string,
-  error: EtantError,
+  error: LetantError,
 ): asserts target is Parser.Language {
   if (!isTreeSitterLanguage(target)) {
     if (isTreeSitterLanguageRecord(target)) {
@@ -60,7 +60,7 @@ export function assertTreeSitterLanguage(
 export function assertPluginDescriptor(
   target: unknown,
   name: string,
-  error: EtantError,
+  error: LetantError,
 ): asserts target is Plugin.Descriptor {
   const fail = (reason: string) => {
     error.message = `Failed to load plugin "${name}", ${reason}`;

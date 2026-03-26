@@ -1,4 +1,4 @@
-import { scmPlugin } from "etant/query";
+import { scmPlugin } from "letant/query";
 import { defineConfig, type Options } from "tsup";
 
 const options: Options = {
@@ -7,7 +7,7 @@ const options: Options = {
   esbuildPlugins: [scmPlugin],
   minify: false,
   target: ["node22", "node24", "node25"],
-  external: ["etant", "tree-sitter-javascript"],
+  external: ["letant", "tree-sitter-javascript"],
   sourcemap: false,
 };
 

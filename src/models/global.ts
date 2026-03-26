@@ -54,8 +54,8 @@ type BindingNode<K extends string = string> = BaseNode<K> & {
  * @template K - String union of valid `kind` values for this node. Defaults to
  * `string` for untyped use; narrow it to a literal union to get type-safe `kind` access.
  * @example
- * import type * as etant from "etant";
- * type Node = etant.Node<"node kind" | "string literals">;
+ * import type * as letant from "letant";
+ * type Node = letant.Node<"node kind" | "string literals">;
  */
 export type Node<K extends string = string> = ScopeNode<K> | BindingNode<K>;
 
@@ -63,8 +63,8 @@ export type Node<K extends string = string> = ScopeNode<K> | BindingNode<K>;
  * @template K - String union of valid `kind` values for this edge. Defaults to
  * `string` for untyped use; narrow it to a literal union to get type-safe `kind` access.
  * @example
- * import type * as etant from "etant";
- * type Edge = etant.Edge<"edge kind" | "string literals">;
+ * import type * as letant from "letant";
+ * type Edge = letant.Edge<"edge kind" | "string literals">;
  */
 export type Edge<K extends string = string> = {
   /**

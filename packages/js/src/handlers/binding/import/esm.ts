@@ -1,4 +1,4 @@
-import { createChildPath, createConvertResult } from "etant/utils";
+import { createChildPath, createConvertResult } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 

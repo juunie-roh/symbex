@@ -1,4 +1,4 @@
-import { createChildPath, createConvertResult, getRange } from "etant/utils";
+import { createChildPath, createConvertResult, getRange } from "letant/utils";
 import type { SyntaxNode } from "tree-sitter";
 
 import type { ConvertHandler, Edge, Node } from "@/types";

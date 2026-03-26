@@ -28,7 +28,7 @@ export default defineConfig([
   {
     ...options,
     dts: { entry },
-    entry: [...entry, "src/bin/etant.ts"],
+    entry: [...entry, "src/bin/letant.ts"],
     format: "cjs",
   },
 ]);

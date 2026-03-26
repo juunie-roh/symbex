@@ -30,7 +30,7 @@ vi.mock("tree-sitter", () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_PLUGIN = "@etant/javascript";
+const VALID_PLUGIN = "@letant/javascript";
 
 const validLangShape = {
   name: "typescript",
@@ -62,7 +62,7 @@ describe("Plugin.load()", () => {
   });
 
   it("rejects when the module cannot be imported", async () => {
-    await expect(Plugin.load("@etant/nonexistent")).rejects.toThrow(CoreError);
+    await expect(Plugin.load("@letant/nonexistent")).rejects.toThrow(CoreError);
   });
 
   describe("with a valid plugin", () => {

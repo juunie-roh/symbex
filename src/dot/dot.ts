@@ -11,7 +11,7 @@ type DotGraphOptions = {
 
 function printDotGraph(
   graph: Serialized,
-  { name = "etant", rankdir = "TB", indent: space = 0 }: DotGraphOptions,
+  { name = "letant", rankdir = "TB", indent: space = 0 }: DotGraphOptions,
 ) {
   const lines: string[] = [
     `digraph ${JSON.stringify(name)} {`,

@@ -1,4 +1,4 @@
-import type { CaptureConfigOptions } from "etant";
+import type { CaptureConfigOptions } from "letant";
 import type Parser from "tree-sitter";
 
 import { bypass, query } from "@/query";

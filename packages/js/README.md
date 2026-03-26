@@ -1,3 +1,3 @@
-# @etant/javascript
+# @letant/javascript
 
-JavaScript grammar provider plugin for etant core library.
+JavaScript grammar provider plugin for letant core library.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { defined } from "./defined";
-import { EtantError } from "./error";
+import { LetantError } from "./error";
 
 describe("defined — boolean overload", () => {
   it("does not throw for true", () => {
@@ -13,7 +13,7 @@ describe("defined — boolean overload", () => {
   });
 
   it("throws the provided SpineError for false", () => {
-    const error = new EtantError("BIN_INVALID_OPTION", "test");
+    const error = new LetantError("BIN_INVALID_OPTION", "test");
     expect(() => defined(false, error)).toThrow(error);
   });
 
@@ -40,12 +40,12 @@ describe("defined — generic overload", () => {
   });
 
   it("throws the provided SpineError for null", () => {
-    const error = new EtantError("GRAPH_NO_NODE", "missing node");
+    const error = new LetantError("GRAPH_NO_NODE", "missing node");
     expect(() => defined(null, error)).toThrow(error);
   });
 
   it("throws the provided SpineError for undefined", () => {
-    const error = new EtantError("GRAPH_NO_NODE", "missing node");
+    const error = new LetantError("GRAPH_NO_NODE", "missing node");
     expect(() => defined(undefined, error)).toThrow(error);
   });
 

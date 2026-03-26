@@ -1,4 +1,4 @@
-import { QueryMap } from "etant/query";
+import { QueryMap } from "letant/query";
 import type Parser from "tree-sitter";
 import JavaScript from "tree-sitter-javascript";
 

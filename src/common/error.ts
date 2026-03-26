@@ -1,4 +1,4 @@
-export type EtantErrorCode =
+export type LetantErrorCode =
   // binary
   | "BIN_MODULE_NOT_FOUND"
   | "BIN_INVALID_OPTION"
@@ -26,10 +26,10 @@ export type EtantErrorCode =
   // workspace
   | "WORKSPACE_FILE_NOT_PARSED";
 
-export class EtantError extends Error {
-  readonly code: EtantErrorCode;
+export class LetantError extends Error {
+  readonly code: LetantErrorCode;
 
-  constructor(code: EtantErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: LetantErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = this.constructor.name;
     this.code = code;

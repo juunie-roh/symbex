@@ -1,4 +1,4 @@
-import type * as etant from "etant";
+import type * as letant from "letant";
 
 export type QueryConfig = {
   if: {
@@ -43,30 +43,30 @@ export type BypassQueryKey = "export";
 
 export type NodeKind = keyof QueryConfig | "parameter" | "component" | "else";
 
-export type Node = etant.Node<NodeKind>;
+export type Node = letant.Node<NodeKind>;
 
 export type EdgeKind = "defines" | "extends" | "contains" | "imports";
 
-export type Edge = etant.Edge<EdgeKind>;
+export type Edge = letant.Edge<EdgeKind>;
 
-export type CaptureConfig = etant.CaptureConfig<QueryConfig>;
+export type CaptureConfig = letant.CaptureConfig<QueryConfig>;
 
 export type SingleCaptureResult<K extends keyof QueryConfig> =
-  etant.SingleCaptureResult<QueryConfig[K]>;
+  letant.SingleCaptureResult<QueryConfig[K]>;
 
-export type FullCaptureResult = etant.FullCaptureResult<QueryConfig>;
+export type FullCaptureResult = letant.FullCaptureResult<QueryConfig>;
 
-export type ConvertConfig = etant.ConvertConfig<QueryConfig, Node, Edge>;
+export type ConvertConfig = letant.ConvertConfig<QueryConfig, Node, Edge>;
 
-export type ConvertContext = etant.ConvertContext<QueryConfig, Node, Edge>;
+export type ConvertContext = letant.ConvertContext<QueryConfig, Node, Edge>;
 
-export type ConvertResult = etant.ConvertResult<Node, Edge>;
+export type ConvertResult = letant.ConvertResult<Node, Edge>;
 
-export type ConvertHandler<K extends keyof QueryConfig> = etant.ConvertHandler<
+export type ConvertHandler<K extends keyof QueryConfig> = letant.ConvertHandler<
   QueryConfig,
   QueryConfig[K],
   Node,
   Edge
 >;
 
-export type Descriptor = etant.Plugin.Descriptor<QueryConfig, Node, Edge>;
+export type Descriptor = letant.Plugin.Descriptor<QueryConfig, Node, Edge>;

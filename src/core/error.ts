@@ -1,8 +1,8 @@
-import { EtantError, EtantErrorCode } from "@/common/error";
+import { LetantError, LetantErrorCode } from "@/common/error";
 
-type CoreErrorCode = Extract<EtantErrorCode, `CORE_${string}`>;
+type CoreErrorCode = Extract<LetantErrorCode, `CORE_${string}`>;
 
-class CoreError extends EtantError {
+class CoreError extends LetantError {
   constructor(code: CoreErrorCode, message: string, options?: ErrorOptions) {
     super(code, message, options);
   }

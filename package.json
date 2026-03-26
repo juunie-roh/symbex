@@ -1,5 +1,5 @@
 {
-  "name": "etant",
+  "name": "letant",
   "version": "0.0.0",
   "description": "AST based language-agnostic structural code comprehension",
   "keywords": [],
@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/juunie-roh/etant.git"
+    "url": "git+https://github.com/juunie-roh/letant.git"
   },
-  "homepage": "https://github.com/juunie-roh/etant#readme",
+  "homepage": "https://github.com/juunie-roh/letant#readme",
   "bugs": {
-    "url": "https://github.com/juunie-roh/etant/issues"
+    "url": "https://github.com/juunie-roh/letant/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -21,7 +21,7 @@
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "bin": "dist/bin/etant.js",
+  "bin": "dist/bin/letant.js",
   "files": [
     "dist",
     "CHANGELOG.md"
@@ -65,12 +65,12 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "check-types:all": "tsc -p ./tsconfig.json --noEmit && pnpm -r check-types",
     "dev": "tsup --watch",
-    "dev:config": "LOG_LEVEL=debug node dist/bin/etant.js --config src/__mocks__/etant.config.json",
+    "dev:config": "LOG_LEVEL=debug node dist/bin/letant.js --config src/__mocks__/letant.config.json",
     "lint": "eslint . --cache",
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "js": "pnpm --filter @etant/js"
+    "js": "pnpm --filter @letant/js"
   },
   "dependencies": {
     "commander": "^14.0.3",
@@ -85,7 +85,7 @@
     "@commitlint/format": "^20.5.0",
     "@commitlint/types": "^20.5.0",
     "@eslint/js": "^10.0.1",
-    "@etant/js": "workspace:*",
+    "@letant/js": "workspace:*",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",

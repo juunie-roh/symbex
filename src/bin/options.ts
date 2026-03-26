@@ -3,7 +3,7 @@ import { createOption } from "@commander-js/extra-typings";
 export const configOption = createOption(
   "--config <config-path>",
   "Specify configuration path to use",
-).default("etant.config.json", `Look up for "etant.config.json" from cwd`);
+).default("letant.config.json", `Look up for "letant.config.json" from cwd`);
 
 export const encodingOption = createOption(
   "--encoding <buffer-encoding>",

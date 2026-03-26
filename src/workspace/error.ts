@@ -1,8 +1,8 @@
-import { EtantError, EtantErrorCode } from "@/common/error";
+import { LetantError, LetantErrorCode } from "@/common/error";
 
-type WorkspaceErrorCode = Extract<EtantErrorCode, `WORKSPACE_${string}`>;
+type WorkspaceErrorCode = Extract<LetantErrorCode, `WORKSPACE_${string}`>;
 
-class WorkspaceError extends EtantError {
+class WorkspaceError extends LetantError {
   constructor(
     code: WorkspaceErrorCode,
     message: string,

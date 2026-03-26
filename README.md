@@ -1,38 +1,38 @@
-# etant
+# letant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?logo=opensourceinitiative&logoColor=fff)](https://opensource.org/licenses/MIT)
 
-A structural code comprehension tool. etant parses source files using Tree-Sitter, extracts every scope boundary and name binding, and exposes the result as a queryable scope graph. Given a position in source code, it traces the provenance of every symbol the scope depends on — what each name resolves to and where each definition originates.
+A structural code comprehension tool. letant parses source files using Tree-Sitter, extracts every scope boundary and name binding, and exposes the result as a queryable scope graph. Given a position in source code, it traces the provenance of every symbol the scope depends on — what each name resolves to and where each definition originates.
 
 The scope graph is the mechanism, not the product. The product is a set of resolved cursors pointing to the definitions a scope depends on, each carrying a position pointer to load source on demand.
 
 ```text
 Current:   AI → text search → fuzzy text matches → AI re-parses into understanding
-etant:    AI → scope graph → provenance trace → precise dependency set
+letant:    AI → scope graph → provenance trace → precise dependency set
 ```
 
 ## Purpose
 
 Current code retrieval operates on text. Searches match on lexical proximity; results include code that *mentions* a concept rather than code that *performs* it; structural relationships like inheritance and containment are invisible.
 
-etant approaches this differently: parse once, index structurally, query structurally. The index stores every scope and every name introduced within it. A scope is a region where names are valid — a file, a function body, a class body. A binding is a name introduced into a scope — a declaration, a parameter, an import. Some constructs are both: a function is introduced into its parent scope and creates a new scope for its own locals.
+letant approaches this differently: parse once, index structurally, query structurally. The index stores every scope and every name introduced within it. A scope is a region where names are valid — a file, a function body, a class body. A binding is a name introduced into a scope — a declaration, a parameter, an import. Some constructs are both: a function is introduced into its parent scope and creates a new scope for its own locals.
 
 The output is a **scope graph**: a directed graph where nodes are declarations and scopes, and edges are structural relationships — containment (`defines`), inheritance (`extends`), and module dependencies (`imports`).
 
 ### A Different Question
 
-Every other tool in this space asks "where is this symbol and who uses it?" — a cartographic question that requires mapping everything. etant asks "where did this come from?" — a genealogical question that requires only following the lineage of what you're looking at.
+Every other tool in this space asks "where is this symbol and who uses it?" — a cartographic question that requires mapping everything. letant asks "where did this come from?" — a genealogical question that requires only following the lineage of what you're looking at.
 
-This follows the natural direction of code comprehension. When you read code, you encounter a symbol and look up where it came from. etant only traces forward: from usage to origin. This requires only declaration indexing, not reference indexing. The graph is smaller, resolution is cheaper, and results are precise to the scope you're in.
+This follows the natural direction of code comprehension. When you read code, you encounter a symbol and look up where it came from. letant only traces forward: from usage to origin. This requires only declaration indexing, not reference indexing. The graph is smaller, resolution is cheaper, and results are precise to the scope you're in.
 
 ### Composable with Search Tools
 
-etant doesn't need its own "find" capability. It sits downstream of search tools:
+letant doesn't need its own "find" capability. It sits downstream of search tools:
 
 - **ast-grep** finds *where* something is (structural pattern match)
-- **etant** explains *what it depends on* (provenance trace)
+- **letant** explains *what it depends on* (provenance trace)
 
-The integration surface is a file path and a byte offset. ast-grep gives a location. etant takes that location and traces its dependency chain.
+The integration surface is a file path and a byte offset. ast-grep gives a location. letant takes that location and traces its dependency chain.
 
 ## Architecture
 
@@ -62,7 +62,7 @@ Every node has a `type` field with one of three values:
 
 ### Responsibilities
 
-etant separates concerns across three layers:
+letant separates concerns across three layers:
 
 **Language plugin** — interprets the raw Tree-Sitter AST for a specific language. Faithfully extracts every construct the parser exposes and maps it to the common node/edge schema. Two phases:
 
@@ -160,13 +160,13 @@ pnpm test
 To work on the JavaScript plugin:
 
 ```bash
-pnpm js <script>   # --filter @etant/javascript
+pnpm js <script>   # --filter @letant/javascript
 ```
 
 ### CLI
 
 ```bash
-etant <file> --config <path>
+letant <file> --config <path>
 ```
 
 Options:

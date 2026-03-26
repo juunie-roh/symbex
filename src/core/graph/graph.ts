@@ -1,12 +1,18 @@
 import { defined } from "@/common/defined";
-import type { Edge as E, Node as N, NodeId, NodePath } from "@/models";
+import type {
+  Edge as E,
+  Node as N,
+  NodeId,
+  NodePath,
+  UnionOmit,
+} from "@/models";
 
 import GraphCursor from "./cursor";
 import GraphError from "./error";
-import { HashRegistry } from "./hash-registry";
+import HashRegistry from "./hash-registry";
 
-namespace Graph {
-  export type Node = Exclude<N, "path"> & {
+declare namespace Graph {
+  export type Node = UnionOmit<N, "path"> & {
     id: NodeId;
     /**
      * Last element of path segments representing the node.

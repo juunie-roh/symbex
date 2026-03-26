@@ -198,7 +198,7 @@ describe("LanguagePlugin.load()", () => {
   });
 
   describe("with a valid plugin", () => {
-    it("returns a PluginDescriptor with the expected shape", () => {
+    it("returns a Plugin.Descriptor with the expected shape", () => {
       spyLoad({ default: fakeDescriptor() });
 
       const descriptor = Plugin.load(VALID_PLUGIN);

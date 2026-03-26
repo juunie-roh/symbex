@@ -3,15 +3,31 @@ import Parser from "tree-sitter";
 import { assertPluginDescriptor } from "@/common/checker";
 import { Log } from "@/common/decorators";
 import type {
+  CaptureConfig,
+  ConvertConfig,
   Edge,
   Node,
   NodePath,
-  PluginDescriptor,
   QueryConfig,
 } from "@/models";
 import { createCapture, createConvert } from "@/utils";
+import { QueryMap } from "@/utils/query";
 
 import CoreError from "./error";
+
+declare namespace Plugin {
+  export interface Descriptor<
+    Q extends QueryConfig = QueryConfig,
+    N extends Node = Node,
+    E extends Edge = Edge,
+  > {
+    language: Parser.Language;
+    query: QueryMap<keyof Q & string>;
+    captureConfig: CaptureConfig<Q>;
+    convertConfig: ConvertConfig<Q, N, E>;
+    references: (node: Parser.SyntaxNode) => string[];
+  }
+}
 
 /**
  * Represents a loaded and initialized symbex language plugin.
@@ -19,7 +35,7 @@ import CoreError from "./error";
 class Plugin {
   private _parser: Parser;
 
-  private _module: PluginDescriptor;
+  private _module: Plugin.Descriptor;
 
   private _capture: ReturnType<typeof createCapture<QueryConfig>>;
 
@@ -42,8 +58,8 @@ class Plugin {
     this._parser.setLanguage(this._module.language);
   }
 
-  static load(name: string): PluginDescriptor {
-    let m: PluginDescriptor;
+  static load(name: string): Plugin.Descriptor {
+    let m: Plugin.Descriptor;
 
     try {
       require.resolve(name);
@@ -89,7 +105,7 @@ class Plugin {
    * @param options Parsing options passed to tree-sitter.
    * @throws If the language plugin fails to parse the file.
    */
-  @Log({ level: "debug" })
+  @Log({ level: "debug", label: "Plugin.Parse" })
   parse(
     source: string,
     oldTree?: Parser.Tree | null,
@@ -110,7 +126,7 @@ class Plugin {
     return this._module.references(node);
   }
 
-  @Log({ level: "debug" })
+  @Log({ level: "debug", label: "Plugin.extract" })
   extract(
     filePath: string,
     node: Parser.SyntaxNode,

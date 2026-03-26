@@ -10,7 +10,7 @@ import CoreError from "./error";
 import Graph from "./graph";
 import Plugin from "./plugin";
 
-namespace PluginHandler {
+declare namespace PluginHandler {
   export type ParseResult = {
     graph: Graph;
     tree: Parser.Tree;
@@ -48,7 +48,7 @@ class PluginHandler {
    * @param options {@link Parser.Options | Parsing options} passed to tree-sitter.
    * @throws If the file has any syntax error.
    */
-  @Log({ level: "debug" })
+  @Log({ level: "debug", label: "PluginHandler.Parse" })
   parse(
     filePath: string,
     source: string,
@@ -71,7 +71,7 @@ class PluginHandler {
     };
   }
 
-  @Log({ level: "debug" })
+  @Log({ level: "debug", label: "PluginHandler.references" })
   references(node: Parser.SyntaxNode, pluginName: string): string[] {
     const plugin = this.plugins.get(pluginName);
     if (!this.plugins.has(pluginName))

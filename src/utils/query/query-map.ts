@@ -94,4 +94,4 @@ class QueryMap<K extends string> extends Map<K, Parser.Query> {
   }
 }
 
-export { QueryMap };
+export default QueryMap;

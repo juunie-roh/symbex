@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { NodeId, NodePath } from "@/models";
 
-import { HashRegistry } from "./hash-registry";
+import HashRegistry from "./hash-registry";
 
 const store = vi.hoisted(() => ({
   realCreateHash: undefined as typeof createHash | undefined,

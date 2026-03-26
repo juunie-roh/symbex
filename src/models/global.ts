@@ -1,17 +1,7 @@
 import type Parser from "tree-sitter";
 
-import type { QueryMap } from "@/utils/query";
+import type { Branded } from "./utility";
 
-import type { CaptureConfig } from "./capture";
-import type { ConvertConfig } from "./convert";
-
-/**
- * @template T A type to make a brand on.
- * @template K A name of brand.
- * @example
- * type NodeId = Branded<string, "NodeId"> // NodeId = string & { readonly __brand: "NodeId" }
- */
-export type Branded<T, K extends string> = T & { readonly __brand: K };
 export type NodeId = Branded<string, "NODE_ID">;
 export type NodePath = Branded<string[], "NODE_PATH">;
 export type NodePathString = Branded<string, "NODE_PATH_STRING">;
@@ -99,17 +89,5 @@ export type QueryConfig = Record<
   string,
   { required: string; optional: string }
 >;
-
-export interface PluginDescriptor<
-  Q extends QueryConfig = QueryConfig,
-  N extends Node = Node,
-  E extends Edge = Edge,
-> {
-  language: Parser.Language;
-  query: QueryMap<keyof Q & string>;
-  captureConfig: CaptureConfig<Q>;
-  convertConfig: ConvertConfig<Q, N, E>;
-  references: (node: Parser.SyntaxNode) => string[];
-}
 
 export type Offset = Parser.Point | number;

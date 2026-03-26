@@ -1,6 +1,6 @@
 import type Parser from "tree-sitter";
 
-import type { PluginDescriptor } from "@/models";
+import type { Plugin } from "@/core";
 
 import { SymbexError } from "./error";
 
@@ -55,13 +55,13 @@ export function assertTreeSitterLanguage(
 }
 
 /**
- * Coerces the target to satisfy {@link PluginDescriptor}.
+ * Coerces the target to satisfy {@link Plugin.Descriptor}.
  */
 export function assertPluginDescriptor(
   target: unknown,
   name: string,
   error: SymbexError,
-): asserts target is PluginDescriptor {
+): asserts target is Plugin.Descriptor {
   const fail = (reason: string) => {
     error.message = `Failed to load plugin "${name}", ${reason}`;
     throw error;

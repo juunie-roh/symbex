@@ -11,7 +11,7 @@ import GraphError from "./error";
  * {@link ID_BYTES} bytes), and stored in forward and inverted maps for O(1) lookup in
  * both directions.
  */
-export class HashRegistry {
+class HashRegistry {
   /**
    * Number of bytes taken from the SHA-256 digest to form a {@link NodeId}.
    */
@@ -118,3 +118,5 @@ export class HashRegistry {
     return string.split(HashRegistry.DELIMITER) as NodePath;
   }
 }
+
+export default HashRegistry;

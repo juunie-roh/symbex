@@ -1,4 +1,4 @@
-interface Config {
+export interface Config {
   language: {
     ext: string;
     name: string;
@@ -6,5 +6,3 @@ interface Config {
     [k: string]: string;
   }[];
 }
-
-export type { Config };

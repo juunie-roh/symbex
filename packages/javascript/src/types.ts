@@ -65,4 +65,4 @@ export type ConvertHandler<K extends keyof QueryConfig> = symbex.ConvertHandler<
   Edge
 >;
 
-export type PluginDescriptor = symbex.PluginDescriptor<QueryConfig, Node, Edge>;
+export type Descriptor = symbex.Plugin.Descriptor<QueryConfig, Node, Edge>;

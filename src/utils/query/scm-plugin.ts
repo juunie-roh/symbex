@@ -16,4 +16,4 @@ const scmPlugin: Plugin = {
   },
 };
 
-export { scmPlugin };
+export default scmPlugin;

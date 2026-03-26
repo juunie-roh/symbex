@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { scmPlugin } from "./scm-plugin";
+import scmPlugin from "./scm-plugin";
 
 vi.mock("fs");
 

@@ -44,7 +44,7 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.1.0(jiti@2.6.1))
-      '@etant/javascript':
+      '@etant/js':
         specifier: workspace:*
         version: link:packages/javascript
       '@types/node':
@@ -1727,6 +1727,10 @@ packages:
 
   node-addon-api@8.6.0:
     resolution: {integrity: sha512-gBVjCaqDlRUk0EwoPNKzIr9KkS9041G/q31IBShPs1Xz6UTA+EXdZADbzqAJQrpDRq71CIMnOP5VMut3SL0z5Q==}
+    engines: {node: ^18 || ^20 || >= 21}
+
+  node-addon-api@8.7.0:
+    resolution: {integrity: sha512-9MdFxmkKaOYVTV+XVRG8ArDwwQ77XIgIPyKASB1k3JPq3M8fGQQQE3YpMOrKm6g//Ktx8ivZr8xo1Qmtqub+GA==}
     engines: {node: ^18 || ^20 || >= 21}
 
   node-gyp-build@4.8.4:
@@ -4006,6 +4010,8 @@ snapshots:
 
   node-addon-api@8.6.0: {}
 
+  node-addon-api@8.7.0: {}
+
   node-gyp-build@4.8.4: {}
 
   object-assign@4.1.1: {}
@@ -4363,7 +4369,7 @@ snapshots:
 
   tree-sitter@0.25.0:
     dependencies:
-      node-addon-api: 8.6.0
+      node-addon-api: 8.7.0
       node-gyp-build: 4.8.4
 
   ts-api-utils@2.5.0(typescript@5.9.3):

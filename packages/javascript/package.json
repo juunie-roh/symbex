@@ -1,5 +1,5 @@
 {
-  "name": "@etant/javascript",
+  "name": "@etant/js",
   "version": "0.0.0",
   "description": "JavaScript plugin for etant",
   "main": "dist/index.js",

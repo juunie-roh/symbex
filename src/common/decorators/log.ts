@@ -81,7 +81,7 @@ function apply(
 ): unknown {
   const logger = Logger.get();
   const level = options.level ?? "info";
-  const name = options.label ?? String(context.name ?? "anonymous");
+  const name = String(context.name ?? "anonymous");
   const message = options.message;
 
   const qualify = (self: unknown): string => {
@@ -100,7 +100,7 @@ function apply(
     case "method":
       const method = target as (...args: unknown[]) => unknown;
       return function (this: unknown, ...args: unknown[]): unknown {
-        const name = qualify(this);
+        const name = options.label ?? qualify(this);
         logger[level](`${name} called`);
         // check performance only at the "debug" level.
         const s = level === "debug" ? performance.now() : undefined;

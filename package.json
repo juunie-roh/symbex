@@ -65,7 +65,7 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "check-types:all": "tsc -p ./tsconfig.json --noEmit && pnpm -r check-types",
     "dev": "tsup --watch",
-    "dev:config": "LOG_LEVEL=debug node dist/bin/symbex.js --config __mocks__/symbex.config.json",
+    "dev:config": "LOG_LEVEL=debug node dist/bin/symbex.js --config src/__mocks__/symbex.config.json",
     "lint": "eslint . --cache",
     "prepare": "husky",
     "test": "vitest run",

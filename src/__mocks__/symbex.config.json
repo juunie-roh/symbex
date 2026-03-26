@@ -1,0 +1,12 @@
+{
+  "language": [
+    {
+      "ext": ".js",
+      "name": "@symbex/javascript"
+    },
+    {
+      "ext": ".jsx",
+      "name": "@symbex/javascript"
+    }
+  ]
+}

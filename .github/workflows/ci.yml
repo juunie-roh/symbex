@@ -2,16 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["*"]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 permissions:
   contents: read
 
 # disable husky
 env:
-  HUSKY: "0"
+  HUSKY: 0
 
 jobs:
   test_on_node:

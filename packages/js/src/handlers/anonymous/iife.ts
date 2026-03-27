@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-const iifeHandler: ConvertHandler<"iife"> = (
+const iifeHandler: ConvertHandler<"iife.anonymous"> = (
   captures,
   parent,
   { capture, convert },

@@ -9,6 +9,7 @@ export default defineConfig({
     },
   },
   test: {
+    setupFiles: ["src/__mocks__/setup.ts"],
     include: [
       "src/**/*.(test|spec).*",
       "packages/javascript/src/**/*.(test|spec).*",

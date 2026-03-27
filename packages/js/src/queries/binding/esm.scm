@@ -1,5 +1,5 @@
 ;; ESM
-;; import "@source";
+;; top-stated static imports
 (import_statement
   (import_clause
     [
@@ -12,6 +12,6 @@
         (import_specifier
           name: (identifier) @name
           alias: (identifier)? @alias))
-    ])?
+    ])
   source: (string (string_fragment) @source)
 )

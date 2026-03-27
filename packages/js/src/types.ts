@@ -5,21 +5,25 @@ export type QueryConfig = {
     required: "node" | "body" | "condition";
     optional: "else" | "else_body";
   };
-  iife: {
+  "iife.anonymous": {
     required: "node" | "body";
+    optional: never;
+  };
+  "cjs.binding": {
+    required: "source" | "name";
+    optional: never;
+  };
+  "esm.binding": {
+    required: "source" | "name";
+    optional: "alias";
+  };
+  "iife.binding": {
+    required: "kind" | "name" | "body";
     optional: never;
   };
   member: {
     required: "node" | "name";
     optional: "is_static" | "decorator";
-  };
-  esm: {
-    required: "source";
-    optional: "alias" | "name";
-  };
-  iife_import: {
-    required: "kind" | "name" | "body";
-    optional: never;
   };
   variable: {
     required: "node" | "name" | "kind";
@@ -41,7 +45,11 @@ export type QueryConfig = {
 
 export type BypassQueryKey = "export";
 
-export type NodeKind = keyof QueryConfig | "parameter" | "component" | "else";
+export type NodeKind =
+  | letant.Head<keyof QueryConfig>
+  | "parameter"
+  | "component"
+  | "else";
 
 export type Node = letant.Node<NodeKind>;
 

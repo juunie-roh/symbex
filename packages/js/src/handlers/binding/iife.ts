@@ -2,9 +2,12 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import flatPattern from "../../utility/pattern";
+import flatPattern from "../utility/pattern";
 
-const iifeImportHandler: ConvertHandler<"iife_import"> = (captures, parent) => {
+const iifeBindingHandler: ConvertHandler<"iife.binding"> = (
+  captures,
+  parent,
+) => {
   const result = createConvertResult<Node, Edge>();
   for (const c of captures) {
     const { kind, name, body } = c;
@@ -19,7 +22,7 @@ const iifeImportHandler: ConvertHandler<"iife_import"> = (captures, parent) => {
       result.nodes.push({
         path,
         type: "binding",
-        kind: "iife_import",
+        kind: "iife",
         at: getRange(body),
         props: { kind: kind.text },
       });
@@ -34,7 +37,7 @@ const iifeImportHandler: ConvertHandler<"iife_import"> = (captures, parent) => {
         result.nodes.push({
           path,
           type: "binding",
-          kind: "iife_import",
+          kind: "iife",
           at: getRange(body),
           props: { kind: kind.text },
         });
@@ -45,4 +48,4 @@ const iifeImportHandler: ConvertHandler<"iife_import"> = (captures, parent) => {
   return result;
 };
 
-export default iifeImportHandler;
+export default iifeBindingHandler;

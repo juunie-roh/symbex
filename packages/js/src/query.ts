@@ -4,10 +4,11 @@ import JavaScript from "tree-sitter-javascript";
 
 // anonymous
 import ifQueryString from "@/queries/anonymous/if.scm";
-import iifeQueryString from "@/queries/anonymous/iife.scm";
+import iifeAnonymousQueryString from "@/queries/anonymous/iife.scm";
 // binding
-import esmQueryString from "@/queries/binding/import/esm.scm";
-import iifeImportQueryString from "@/queries/binding/import/iife.scm";
+import cjsBindingQueryString from "@/queries/binding/cjs.scm";
+import esmBindingQueryString from "@/queries/binding/esm.scm";
+import iifeBindingQueryString from "@/queries/binding/iife.scm";
 import memberQueryString from "@/queries/binding/member.scm";
 import variableQueryString from "@/queries/binding/variable.scm";
 // bypass
@@ -25,10 +26,11 @@ export const language = JavaScript as Parser.Language;
 export const query = new QueryMap<keyof QueryConfig>(language)
   // anonymous
   .set("if", ifQueryString)
-  .set("iife", iifeQueryString)
+  .set("iife.anonymous", iifeAnonymousQueryString)
   // binding
-  .set("esm", esmQueryString)
-  .set("iife_import", iifeImportQueryString)
+  .set("cjs.binding", cjsBindingQueryString)
+  .set("esm.binding", esmBindingQueryString)
+  .set("iife.binding", iifeBindingQueryString)
   .set("member", memberQueryString)
   .set("variable", variableQueryString)
   // scope

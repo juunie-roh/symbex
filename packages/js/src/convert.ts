@@ -1,7 +1,8 @@
 import ifHandler from "./handlers/anonymous/if";
 import iifeHandler from "./handlers/anonymous/iife";
-import esmHandler from "./handlers/binding/import/esm";
-import iifeImportHandler from "./handlers/binding/import/iife";
+import cjsBindingHandler from "./handlers/binding/cjs";
+import esmBindingHandler from "./handlers/binding/esm";
+import iifeBindingHandler from "./handlers/binding/iife";
 import memberHandler from "./handlers/binding/member";
 import variableHandler from "./handlers/binding/variable";
 import classHandler from "./handlers/scope/class";
@@ -11,9 +12,10 @@ import type { ConvertConfig } from "./types";
 
 export const convertConfig: ConvertConfig = {
   if: ifHandler,
-  iife: iifeHandler,
-  esm: esmHandler,
-  iife_import: iifeImportHandler,
+  "iife.anonymous": iifeHandler,
+  "cjs.binding": cjsBindingHandler,
+  "esm.binding": esmBindingHandler,
+  "iife.binding": iifeBindingHandler,
   member: memberHandler,
   variable: variableHandler,
   class: classHandler,

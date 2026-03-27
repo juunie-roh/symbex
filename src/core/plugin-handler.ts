@@ -12,37 +12,35 @@ import Plugin from "./plugin";
 
 declare namespace PluginHandler {
   export type ParseResult = {
+    /** A graph constructed from the result converted by plugin. */
     graph: Graph;
+    /** Raw AST parsed by tree-sitter. */
     tree: Parser.Tree;
-    language: string;
+    /** The extension of the parsed file. */
+    ext: string;
   };
 }
 
 class PluginHandler {
   private _languagePlugins: Map<string, Plugin>;
-  private _inverted: Map<Plugin, string>;
 
-  private constructor(
-    languagePlugins: Map<string, Plugin>,
-    inverted: Map<Plugin, string>,
-  ) {
+  private constructor(languagePlugins: Map<string, Plugin>) {
     this._languagePlugins = languagePlugins;
-    this._inverted = inverted;
   }
 
   static async create(config: Config): Promise<PluginHandler> {
     const languagePlugins = new Map<string, Plugin>();
-    const inverted = new Map<Plugin, string>();
 
     await Promise.all(
       config.language.map(async (c) => {
         const plugin = await Plugin.create(c.name);
-        languagePlugins.set(c.ext, plugin);
-        inverted.set(plugin, c.ext);
+        for (const ext of c.extensions) {
+          languagePlugins.set(ext, plugin);
+        }
       }),
     );
 
-    return new PluginHandler(languagePlugins, inverted);
+    return new PluginHandler(languagePlugins);
   }
 
   /**
@@ -67,7 +65,7 @@ class PluginHandler {
     oldTree?: Parser.Tree | null,
     options?: Parser.Options,
   ): PluginHandler.ParseResult {
-    const plugin = this._getPlugin(filePath);
+    const { plugin, ext } = this._getPlugin(filePath);
     const tree = plugin.parse(source, oldTree, options);
 
     if (tree.rootNode.hasError) {
@@ -79,18 +77,19 @@ class PluginHandler {
     return {
       graph: new Graph(nodes, edges),
       tree,
-      language: this._inverted.get(plugin)!,
+      ext,
     };
   }
 
   @Log({ level: "debug", label: "PluginHandler.references" })
-  references(node: Parser.SyntaxNode, pluginName: string): string[] {
-    const plugin = this.plugins.get(pluginName);
-    if (!this.plugins.has(pluginName))
+  references(node: Parser.SyntaxNode, ext: string): string[] {
+    if (!this.plugins.has(ext))
       throw new CoreError(
         "CORE_UNREGISTERED_LANGUAGE",
-        `Unregistered: language for "${pluginName}" not registered in configuration`,
+        `Unregistered: language for "${ext}" not registered in configuration`,
       );
+
+    const plugin = this.plugins.get(ext);
     defined(plugin);
 
     return plugin.references(node);
@@ -101,7 +100,6 @@ class PluginHandler {
    */
   destroy(): void {
     this._languagePlugins.clear();
-    this._inverted.clear();
   }
 
   /**
@@ -109,7 +107,7 @@ class PluginHandler {
    * @throws If no language is registered for the file's extension.
    * @throws If the language is registered but cannot be found in runtime.
    */
-  private _getPlugin(filePath: string): Plugin {
+  private _getPlugin(filePath: string): { plugin: Plugin; ext: string } {
     const ext = path.extname(filePath);
     if (!this.plugins.has(ext))
       throw new CoreError(
@@ -126,7 +124,7 @@ class PluginHandler {
       ),
     );
 
-    return plugin;
+    return { plugin, ext };
   }
 }
 

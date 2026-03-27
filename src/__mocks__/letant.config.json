@@ -1,15 +1,8 @@
 {
+  "rootDir": "../../",
   "language": [
     {
-      "ext": ".js",
-      "name": "@letant/js"
-    },
-    {
-      "ext": ".mjs",
-      "name": "@letant/js"
-    },
-    {
-      "ext": ".jsx",
+      "extensions": [".js", ".cjs", ".mjs", "jsx"],
       "name": "@letant/js"
     }
   ]

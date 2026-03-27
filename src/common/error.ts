@@ -24,7 +24,8 @@ export type LetantErrorCode =
   | "QUERY_SET_DUPLICATE_KEY"
   | "QUERY_GET_INVALID_KEY"
   // workspace
-  | "WORKSPACE_FILE_NOT_PARSED";
+  | "WORKSPACE_FILE_NOT_PARSED"
+  | "WORKSPACE_INVALID_ACCESS";
 
 export class LetantError extends Error {
   readonly code: LetantErrorCode;

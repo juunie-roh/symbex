@@ -35,8 +35,8 @@ const program = createCommand()
   .commandsGroup(group.command.dev)
   .addCommand(queryCommand)
   .action(async (file, others, options) => {
-    const workspace = await Workspace.create(loadConfig(options.config));
-    const { graph } = workspace.open(
+    const workspace = await Workspace.create(await loadConfig(options.config));
+    const { graph } = workspace.openSource(
       file,
       readFileSync(file, options.encoding),
     );

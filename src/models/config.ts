@@ -1,8 +1,7 @@
 export interface Config {
+  rootDir?: string;
   language: {
-    ext: string;
+    extensions: string[];
     name: string;
-    // temporary loose type
-    [k: string]: string;
   }[];
 }

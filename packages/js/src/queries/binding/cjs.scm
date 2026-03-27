@@ -7,7 +7,7 @@
     name: (_) @name
     value: (call_expression
         function: (identifier) @req (#eq? @req "require")
-        arguments: (string (string_fragment) @source)))
+        arguments: (arguments (string (string_fragment) @source))))
 )
 ;; @kind = var
 (variable_declaration
@@ -17,5 +17,5 @@
     name: (_) @name
     value: (call_expression
         function: (identifier) @req (#eq? @req "require")
-        arguments: (string (string_fragment) @source)))
+        arguments: (arguments (string (string_fragment) @source))))
 )

@@ -4,5 +4,5 @@
 (expression_statement
   (call_expression
     function: (identifier) @req (#eq? @req "require")
-    arguments: (string (string_fragment) @source))
+    arguments: (arguments (string (string_fragment) @source)))
 )

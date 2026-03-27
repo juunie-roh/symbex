@@ -13,7 +13,11 @@ import { NormalizePath } from "./decorators";
 import WorkspaceError from "./error";
 
 class Workspace {
-  /** An anchor for the workspace to be opened at. */
+  /**
+   * A root anchor for the workspace.
+   * All the paths used in the workspace are normalized relative to this.
+   * @default cwd()
+   */
   private readonly _rootDir: string;
   private _handler: PluginHandler;
   private _files: Map<string, PluginHandler.ParseResult>;
@@ -73,8 +77,8 @@ class Workspace {
 
   @NormalizePath
   @Log({ level: "debug", label: "Workspace.trace" })
-  trace(filePath: string, target: Offset) {
-    const { ext, cursor, node } = this._syncOffset(filePath, target);
+  trace(filePath: string, offset: Offset) {
+    const { ext, cursor, node } = this._syncOffset(filePath, offset);
 
     const references = this._handler.references(node, ext);
 
@@ -112,32 +116,31 @@ class Workspace {
   @Log({ level: "debug", label: "Workspace._syncOffset" })
   private _syncOffset(
     filePath: string,
-    target: Offset,
+    offset: Offset,
   ): {
     ext: string;
     cursor: GraphCursor;
     node: Parser.SyntaxNode;
   } {
     const { graph, tree, ext } = this.get(filePath);
-    const cursor = GraphCursor.at(graph, target);
+    const cursor = GraphCursor.at(graph, offset);
 
     const cursorNode = cursor.node;
 
-    let offset: number;
+    let o: number;
 
     if (cursorNode.type !== "binding") {
       // for scope node, set start index as its block start index
-      offset = cursorNode.blockStartIndex;
+      o = cursorNode.blockStartIndex;
     } else if ("name" in cursorNode.at) {
       // if the node is an imported module, start at root
-      offset = 0;
+      o = 0;
     } else {
       // neither, then set start index at the node's.
-      offset = cursorNode.at.startIndex;
+      o = cursorNode.at.startIndex;
     }
 
-    const node =
-      tree.rootNode.descendantForIndex(offset).parent ?? tree.rootNode;
+    const node = tree.rootNode.descendantForIndex(o).parent ?? tree.rootNode;
 
     return {
       ext,

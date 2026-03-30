@@ -30,7 +30,7 @@ vi.mock("tree-sitter", () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_PLUGIN = "@letant/javascript";
+const VALID_PLUGIN = "@letant/js";
 
 const validLangShape = {
   name: "typescript",
@@ -65,6 +65,19 @@ describe("Plugin.load()", () => {
     await expect(Plugin.load("@letant/nonexistent")).rejects.toThrow(CoreError);
   });
 
+  describe("module resolution", () => {
+    beforeEach(() => {
+      vi.resetModules();
+    });
+
+    it("uses m.default to resolve the descriptor", async () => {
+      const descriptor = fakeDescriptor();
+      vi.doMock("plugin-esm", () => ({ default: descriptor }));
+      const result = await Plugin.load("plugin-esm");
+      expect(result).toBe(descriptor);
+    });
+  });
+
   describe("with a valid plugin", () => {
     it("returns a Plugin.Descriptor with the expected shape", async () => {
       vi.spyOn(Plugin, "load").mockResolvedValue(
@@ -77,6 +90,7 @@ describe("Plugin.load()", () => {
       expect(descriptor.captureConfig).toBeDefined();
       expect(descriptor.convertConfig).toBeDefined();
       expect(descriptor.language).toMatchObject({ name: expect.any(String) });
+      expect(descriptor.references).toBeDefined();
     });
   });
 });
@@ -126,6 +140,19 @@ describe("Plugin", () => {
         expect((e as CoreError).code).toBe("CORE_PLUGIN_PARSE_FAILED");
         expect((e as CoreError).message).toContain("Failed");
       }
+    });
+  });
+
+  describe("references()", () => {
+    it("delegates to _module.references", async () => {
+      const descriptor = fakeDescriptor();
+      vi.spyOn(Plugin, "load").mockResolvedValue(
+        descriptor as Plugin.Descriptor,
+      );
+      const p = await Plugin.create(VALID_PLUGIN);
+      const node = {} as import("tree-sitter").SyntaxNode;
+      p.references(node);
+      expect(descriptor.references).toHaveBeenCalledWith(node);
     });
   });
 

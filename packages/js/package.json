@@ -1,6 +1,6 @@
 {
   "name": "@juun-roh/letant-js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "JavaScript plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -32,7 +32,7 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "letant": "^0.0.0",
+    "letant": "^0.0.1",
     "tree-sitter-javascript": "^0.25.0"
   },
   "devDependencies": {

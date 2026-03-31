@@ -32,6 +32,8 @@ const program = createCommand()
   .option("-d, --dot [name]", "print the graph in DOT format", false)
   .option("-o, --output <output>", "output file name", false)
   .option("--trace", "temp", false)
+  .option("-r <row>", "temp")
+  .option("-c <col>", "temp")
   .commandsGroup(group.command.dev)
   .addCommand(queryCommand)
   .action(async (file, others, options) => {
@@ -44,7 +46,10 @@ const program = createCommand()
     let data: any = graph.serialize();
 
     if (options.trace) {
-      workspace.trace(file, { row: 69, column: 1 });
+      workspace.trace(file, {
+        row: Number(options.r) ?? 0,
+        column: Number(options.c) ?? 0,
+      });
     }
 
     if (options.dot) {

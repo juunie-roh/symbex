@@ -1,5 +1,5 @@
 {
-  "name": "@letant/js",
+  "name": "@juun-roh/letant-js",
   "version": "0.0.0",
   "description": "JavaScript plugin for letant",
   "main": "dist/index.js",

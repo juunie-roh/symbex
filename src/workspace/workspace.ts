@@ -97,6 +97,8 @@ class Workspace {
         );
       }
     }
+
+    console.log("total:", references.size, "references");
   }
 
   @Log({
@@ -112,7 +114,6 @@ class Workspace {
   /**
    * Synchronize a node with given offset.
    */
-  @NormalizePath
   @Log({ level: "debug", label: "Workspace._syncOffset" })
   private _syncOffset(
     filePath: string,

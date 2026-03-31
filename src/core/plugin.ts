@@ -76,7 +76,8 @@ class Plugin {
       );
     }
 
-    const descriptor = (m.default ?? m) as Plugin.Descriptor;
+    // the `import` always returns a module namespace object with `default`
+    const descriptor = m.default as Plugin.Descriptor;
 
     assertPluginDescriptor(
       descriptor,

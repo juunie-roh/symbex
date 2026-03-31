@@ -44,7 +44,7 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.1.0(jiti@2.6.1))
-      '@letant/js':
+      '@juun-roh/letant-js':
         specifier: workspace:*
         version: link:packages/js
       '@types/node':

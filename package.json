@@ -70,7 +70,7 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "js": "pnpm --filter @letant/js"
+    "js": "pnpm --filter @juun-roh/letant-js"
   },
   "dependencies": {
     "commander": "^14.0.3",
@@ -85,7 +85,7 @@
     "@commitlint/format": "^20.5.0",
     "@commitlint/types": "^20.5.0",
     "@eslint/js": "^10.0.1",
-    "@letant/js": "workspace:*",
+    "@juun-roh/letant-js": "workspace:*",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",

@@ -8,27 +8,36 @@ const entry: string[] = [
   "src/utils/query/index.ts",
 ];
 
-const options: Options = {
+const jsOptions: Options = {
   clean: true,
   dts: false,
   entry,
   splitting: false,
   treeshake: true,
-  minify: false,
+  minify: true,
   target: ["node22", "node24", "node25"],
   sourcemap: false,
 };
 
 export default defineConfig([
   {
-    ...options,
+    ...jsOptions,
     format: "esm",
     outExtension: () => ({ js: ".mjs" }),
   },
   {
-    ...options,
-    dts: { entry },
+    ...jsOptions,
     entry: [...entry, "src/bin/letant.ts"],
     format: "cjs",
+  },
+  // Single DTS build from the root entry only.
+  // All types used in exposed sub-modules should be re-exported from src/index.ts.
+  {
+    clean: false,
+    dts: { only: true },
+    entry: ["src/index.ts"],
+    format: ["cjs"],
+    splitting: false,
+    target: ["node22", "node24", "node25"],
   },
 ]);

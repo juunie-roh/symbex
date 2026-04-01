@@ -5,6 +5,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": ["ESNext"],
+    "types": ["node"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
@@ -15,6 +16,7 @@
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -25,6 +27,6 @@
       "@/*": ["./src/*"],
     }
   },
-  "include": ["**/*.ts", "**/*.*js"],
+  "include": ["./src/**/*.ts", "./src/**/*.*js"],
   "exclude": ["**/node_modules", "**/dist", "packages", "docs"]
 }

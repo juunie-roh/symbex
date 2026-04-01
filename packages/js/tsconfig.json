@@ -15,6 +15,7 @@
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,

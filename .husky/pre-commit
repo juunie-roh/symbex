@@ -1,3 +1,5 @@
 pnpm check-types
 
 pnpm lint
+
+pnpm attw:all

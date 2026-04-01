@@ -36,7 +36,10 @@ export default defineConfig([
     clean: false,
     dts: { only: true },
     entry: ["src/index.ts"],
-    format: ["cjs"],
+    format: ["esm", "cjs"],
+    outExtension: ({ format }) => ({
+      dts: format === "cjs" ? ".d.ts" : ".d.mts",
+    }),
     splitting: false,
     target: ["node22", "node24", "node25"],
   },

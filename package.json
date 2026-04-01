@@ -1,6 +1,6 @@
 {
   "name": "letant",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AST based language-agnostic structural code comprehension",
   "keywords": [],
   "author": "Juun",
@@ -29,37 +29,60 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./config": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/config/index.mjs",
-      "require": "./dist/config/index.js",
-      "default": "./dist/config/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/config/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/config/index.js"
+      }
     },
     "./dot": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/dot/index.mjs",
-      "require": "./dist/dot/index.js",
-      "default": "./dist/dot/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/dot/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/dot/index.js"
+      }
     },
     "./utils": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js",
-      "default": "./dist/utils/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/utils/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/utils/index.js"
+      }
     },
     "./query": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/utils/query/index.mjs",
-      "require": "./dist/utils/query/index.js",
-      "default": "./dist/utils/query/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/utils/query/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/utils/query/index.js"
+      }
     }
   },
   "scripts": {
+    "attw": "attw --pack --ignore-rules 'no-resolution'",
+    "attw:quiet": "attw --pack --quiet --ignore-rules 'no-resolution'",
+    "attw:all": "pnpm attw:quiet && pnpm -r attw:quiet",
     "build": "tsup",
     "build:all": "pnpm build && pnpm -r build",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
@@ -77,6 +100,7 @@
     "tree-sitter": "^0.25.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "@changesets/cli": "^2.30.0",
     "@commander-js/extra-typings": "^14.0.0",
     "@commitlint/cli": "^20.5.0",

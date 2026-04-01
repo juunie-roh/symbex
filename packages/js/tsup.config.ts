@@ -3,6 +3,7 @@ import { defineConfig, type Options } from "tsup";
 
 const options: Options = {
   clean: true,
+  dts: false,
   entry: ["src/index.ts"],
   esbuildPlugins: [scmPlugin],
   minify: false,
@@ -12,6 +13,15 @@ const options: Options = {
 };
 
 export default defineConfig([
-  { ...options, dts: true, format: "cjs" },
-  { ...options, dts: false, format: "esm" },
+  { ...options, format: "cjs" },
+  { ...options, format: "esm" },
+  {
+    ...options,
+    clean: false,
+    dts: { only: true },
+    format: ["esm", "cjs"],
+    outExtension: ({ format }) => ({
+      dts: format === "cjs" ? ".d.ts" : ".d.mts",
+    }),
+  },
 ]);

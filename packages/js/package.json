@@ -1,6 +1,6 @@
 {
   "name": "@juun-roh/letant-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "JavaScript plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -10,13 +10,19 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     }
   },
   "scripts": {
+    "attw": "attw --pack --ignore-rules 'no-resolution'",
+    "attw:quiet": "attw --pack --quiet --ignore-rules 'no-resolution'",
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
@@ -32,10 +38,11 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "letant": "^0.0.1",
+    "letant": "^0.0.2",
     "tree-sitter-javascript": "^0.25.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "letant": "workspace:*",
     "tree-sitter-javascript": "^0.25.0",
     "tsup": "^8.5.1",

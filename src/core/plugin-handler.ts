@@ -2,7 +2,7 @@ import path from "node:path";
 
 import type Parser from "tree-sitter";
 
-import { Log } from "@/common/decorators";
+import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
 import type { Config } from "@/models/config";
 
@@ -58,7 +58,7 @@ class PluginHandler {
    * @param options {@link Parser.Options | Parsing options} passed to tree-sitter.
    * @throws If the file has any syntax error.
    */
-  @Log({ level: "debug", label: "PluginHandler.Parse" })
+  @Trace({ label: "PluginHandler.Parse" })
   parse(
     filePath: string,
     source: string,
@@ -81,7 +81,7 @@ class PluginHandler {
     };
   }
 
-  @Log({ level: "debug", label: "PluginHandler.references" })
+  @Trace({ label: "PluginHandler.references" })
   references(node: Parser.SyntaxNode, ext: string): string[] {
     if (!this.plugins.has(ext))
       throw new CoreError(

@@ -1,7 +1,7 @@
 import Parser from "tree-sitter";
 
 import { assertPluginDescriptor } from "@/common/checker";
-import { Log } from "@/common/decorators";
+import { Trace } from "@/common/decorators";
 import type {
   CaptureConfig,
   ConvertConfig,
@@ -103,7 +103,7 @@ class Plugin {
    * @param options Parsing options passed to tree-sitter.
    * @throws If the language plugin fails to parse the file.
    */
-  @Log({ level: "debug", label: "Plugin.Parse" })
+  @Trace({ label: "Plugin.Parse" })
   parse(
     source: string,
     oldTree?: Parser.Tree | null,
@@ -124,7 +124,7 @@ class Plugin {
     return this._module.references(node);
   }
 
-  @Log({ level: "debug", label: "Plugin.extract" })
+  @Trace({ label: "Plugin.extract" })
   extract(
     filePath: string,
     node: Parser.SyntaxNode,

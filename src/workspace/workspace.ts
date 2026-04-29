@@ -5,7 +5,7 @@ import { cwd } from "node:process";
 
 import Parser from "tree-sitter";
 
-import { Log } from "@/common/decorators";
+import { Trace } from "@/common/decorators";
 import { GraphCursor, PluginHandler } from "@/core";
 import type { Config, Offset } from "@/models";
 
@@ -38,7 +38,7 @@ class Workspace {
   }
 
   @NormalizePath
-  @Log({ level: "debug", label: "Workspace.openSource" })
+  @Trace({ label: "Workspace.openSource" })
   openSource(filePath: string, source: string): PluginHandler.ParseResult {
     const parsed = this._handler.parse(filePath, source);
     this._files.set(filePath, parsed);
@@ -46,7 +46,7 @@ class Workspace {
   }
 
   @NormalizePath
-  @Log({ level: "debug", label: "Workspace.openFile" })
+  @Trace({ label: "Workspace.openFile" })
   async openFile(
     filePath: string,
     encoding: CharacterEncoding = "utf-8",
@@ -76,7 +76,7 @@ class Workspace {
   }
 
   @NormalizePath
-  @Log({ level: "debug", label: "Workspace.trace" })
+  @Trace({ label: "Workspace.trace" })
   trace(filePath: string, offset: Offset) {
     const { ext, cursor, node } = this._syncOffset(filePath, offset);
 
@@ -101,8 +101,7 @@ class Workspace {
     console.log("total:", references.size, "references");
   }
 
-  @Log({
-    level: "debug",
+  @Trace({
     label: "Workspace.destroy",
     message: "Workspace Destroyed",
   })
@@ -114,7 +113,7 @@ class Workspace {
   /**
    * Synchronize a node with given offset.
    */
-  @Log({ level: "debug", label: "Workspace._syncOffset" })
+  @Trace({ label: "Workspace._syncOffset" })
   private _syncOffset(
     filePath: string,
     offset: Offset,

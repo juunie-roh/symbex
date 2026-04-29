@@ -1,3 +1,1 @@
-import Log from "./log";
-
-export { Log };
+export { default as Trace } from "./trace";

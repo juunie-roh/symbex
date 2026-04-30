@@ -1,4 +1,4 @@
-"github actions":
+"github_actions":
   - changed-files:
     - any-glob-to-any-file: ".github/**"
 
@@ -37,6 +37,6 @@ core:
   - changed-files:
     - any-glob-to-any-file: "src/**"
 
-"plugin: typescript":
+"plugin: javascript":
   - changed-files:
-    - any-glob-to-any-file: "packages/typescript/**"
+    - any-glob-to-any-file: "packages/js/**"

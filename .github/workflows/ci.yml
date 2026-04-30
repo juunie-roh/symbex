@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-node${{ matrix.node-version }}-
 
       - name: Install build tools
-        run: sudo apt-get install -y python3 make g++
+        run: sudo apt-get install -y python3 make g++ && npm install -g node-gyp
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
